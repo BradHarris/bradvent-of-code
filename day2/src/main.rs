@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{str::FromStr};
 
 use utils::read_lines;
 
@@ -17,7 +17,7 @@ impl FromStr for RPS {
             "A" | "X" => Ok(RPS::Rock),
             "B" | "Y" => Ok(RPS::Paper),
             "C" | "Z" => Ok(RPS::Scissors),
-            _ => Err(format!("{} is not a valid RPS", s)),
+            _ => Err(format!("{s} is not a valid RPS")),
         }   
     }
 }
@@ -32,12 +32,12 @@ impl RPS {
     }
 
     fn fight(&self, enemy: RPS) -> usize {
-        if enemy == self.lose() { 6 }
-        else if enemy == self.win() { 0 }
+        if enemy == self.win_to() { 6 }
+        else if enemy == self.lose_to() { 0 }
         else { 3 }
     }
 
-    fn win(&self) -> RPS {
+    fn lose_to(&self) -> RPS {
         match self {
             RPS::Rock => RPS::Paper,
             RPS::Paper => RPS::Scissors,
@@ -45,7 +45,7 @@ impl RPS {
         }
     }
 
-    fn lose(&self) -> RPS {
+    fn win_to(&self) -> RPS {
         match self {
             RPS::Rock => RPS::Scissors,
             RPS::Paper => RPS::Rock,
@@ -100,9 +100,9 @@ fn main() {
         })
         .fold(0, |acc, (enemy, expected)| {
             acc + match expected {
-                Round::Lose => enemy.lose().score() + 0,
+                Round::Lose => enemy.win_to().score() + 0,
                 Round::Draw => enemy.draw().score() + 3,
-                Round::Win => enemy.win().score() + 6,
+                Round::Win => enemy.lose_to().score() + 6,
             }
         });
 
