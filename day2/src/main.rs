@@ -86,7 +86,7 @@ fn main() {
         .unwrap()
         .map(|l| {
             let l = l.unwrap();
-            let (enemy, you) = l.split_once(" ").unwrap();
+            let (enemy, you) = l.split_once(' ').unwrap();
             (enemy.parse::<RPS>().unwrap(), you.parse::<RPS>().unwrap())
         })
         .fold(0, |acc, (enemy, you)| acc + you.score() + you.fight(enemy));
@@ -97,7 +97,7 @@ fn main() {
         .unwrap()
         .map(|l| {
             let l = l.unwrap();
-            let (enemy, expected) = l.split_once(" ").unwrap();
+            let (enemy, expected) = l.split_once(' ').unwrap();
             (
                 enemy.parse::<RPS>().unwrap(),
                 expected.parse::<Round>().unwrap(),
@@ -105,7 +105,7 @@ fn main() {
         })
         .fold(0, |acc, (enemy, expected)| {
             acc + match expected {
-                Round::Lose => enemy.win_to().score() + 0,
+                Round::Lose => enemy.win_to().score(),
                 Round::Draw => enemy.draw().score() + 3,
                 Round::Win => enemy.lose_to().score() + 6,
             }
@@ -124,12 +124,12 @@ fn alternate_solution() {
             acc + match l.as_str() {
                 "A X" => 3 + 1, // rock - rock
                 "A Y" => 6 + 2, // rock - paper
-                "A Z" => 0 + 3, // rock - scissors
-                "B X" => 0 + 1, // paper - rock
+                "A Z" => 3, // rock - scissors
+                "B X" => 1, // paper - rock
                 "B Y" => 3 + 2, // paper - paper
                 "B Z" => 6 + 3, // paper - scissors
                 "C X" => 6 + 1, // scissors - rock
-                "C Y" => 0 + 2, // scissors - paper
+                "C Y" => 2, // scissors - paper
                 "C Z" => 3 + 3, // scissors - scissors
                 _ => panic!("{l} does not match anything!"),
             }
@@ -141,13 +141,13 @@ fn alternate_solution() {
         .map(|l| l.unwrap())
         .fold(0, |acc, l| {
             acc + match l.as_str() {
-                "A X" => 0 + 3, // rock - lose - scissors
+                "A X" => 3, // rock - lose - scissors
                 "A Y" => 3 + 1, // rock - draw - rock
                 "A Z" => 6 + 2, // rock - win - paper
-                "B X" => 0 + 1, // paper - lose - rock
+                "B X" => 1, // paper - lose - rock
                 "B Y" => 3 + 2, // paper - draw - paper
                 "B Z" => 6 + 3, // paper - win - scissors
-                "C X" => 0 + 2, // scissors - lose - paper
+                "C X" => 2, // scissors - lose - paper
                 "C Y" => 3 + 3, // scissors - draw - scissors
                 "C Z" => 6 + 1, // scissors - win - rock
                 _ => panic!("{l} does not match anything!"),

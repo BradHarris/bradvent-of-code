@@ -23,11 +23,11 @@ fn main() {
             if let Some(n) = n {
                 let elf = acc.last_mut().unwrap();
                 elf.calories.push(n);
-                elf.total_calories = elf.total_calories + n;
+                elf.total_calories += n;
             } else {
                 acc.push(Elf::new());
             }
-            return acc;
+            acc
         });
 
     elves.sort_by_key(|e| e.total_calories);
