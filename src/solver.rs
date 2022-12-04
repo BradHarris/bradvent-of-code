@@ -25,6 +25,6 @@ pub mod day24;
 pub mod day25;
 
 pub trait Solver {
-    fn solve_part1(&self, input: &Vec<String>) -> usize;
-    fn solve_part2(&self, input: &Vec<String>) -> usize;
+    fn solve_part1(&self, input: &[String]) -> usize;
+    fn solve_part2(&self, input: &[String]) -> usize;
 }

@@ -44,14 +44,14 @@ impl Day3 {
 }
 
 impl Solver for Day3 {
-    fn solve_part1(&self, input: &Vec<String>) -> usize {
+    fn solve_part1(&self, input: &[String]) -> usize {
         input
             .iter()
             .map(|l| l.parse::<RuckSack>().unwrap().find_matching_item())
             .map(|i| self.item_map.get(&i).unwrap())
             .sum()
     }
-    fn solve_part2(&self, input: &Vec<String>) -> usize {
+    fn solve_part2(&self, input: &[String]) -> usize {
         input
             .chunks(3)
             .map(|g| {

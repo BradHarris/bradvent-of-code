@@ -90,7 +90,7 @@ impl Day2 {
 }
 
 impl Solver for Day2 {
-    fn solve_part1(&self, input: &Vec<String>) -> usize {
+    fn solve_part1(&self, input: &[String]) -> usize {
         input
             .iter()
             .map(|l| {
@@ -99,7 +99,7 @@ impl Solver for Day2 {
             })
             .fold(0, |acc, (enemy, you)| acc + you.score() + you.fight(enemy))
     }
-    fn solve_part2(&self, input: &Vec<String>) -> usize {
+    fn solve_part2(&self, input: &[String]) -> usize {
         input
             .iter()
             .map(|l| {

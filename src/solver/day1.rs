@@ -18,7 +18,7 @@ impl Day1 {
         Day1 {}
     }
 
-    fn parse(&self, input: &Vec<String>) -> Vec<Elf> {
+    fn parse(&self, input: &[String]) -> Vec<Elf> {
         let mut elves =
             input
                 .iter()
@@ -40,12 +40,12 @@ impl Day1 {
 }
 
 impl Solver for Day1 {
-    fn solve_part1(&self, input: &Vec<String>) -> usize {
+    fn solve_part1(&self, input: &[String]) -> usize {
         let elves = self.parse(input);
 
         elves.first().unwrap().total_calories
     }
-    fn solve_part2(&self, input: &Vec<String>) -> usize {
+    fn solve_part2(&self, input: &[String]) -> usize {
         let elves = self.parse(input);
 
         elves[0..3].iter().map(|e| e.total_calories).sum()

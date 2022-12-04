@@ -36,7 +36,7 @@ impl Day4 {
         Day4 {}
     }
 
-    fn parse(&self, input: &Vec<String>) -> Vec<(Section, Section)> {
+    fn parse(&self, input: &[String]) -> Vec<(Section, Section)> {
         input
             .iter()
             .map(|l| {
@@ -51,7 +51,7 @@ impl Day4 {
 }
 
 impl Solver for Day4 {
-    fn solve_part1(&self, input: &Vec<String>) -> usize {
+    fn solve_part1(&self, input: &[String]) -> usize {
         self.parse(input)
             .iter()
             .filter(|(first, second)| {
@@ -59,7 +59,7 @@ impl Solver for Day4 {
             })
             .count()
     }
-    fn solve_part2(&self, input: &Vec<String>) -> usize {
+    fn solve_part2(&self, input: &[String]) -> usize {
         self.parse(input)
             .iter()
             .filter(|(first, second)| {
