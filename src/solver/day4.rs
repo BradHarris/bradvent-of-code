@@ -29,15 +29,19 @@ impl FromStr for Section {
     }
 }
 
-pub struct Day4 {}
+pub struct Day4 {
+    input: Vec<(Section, Section)>,
+}
 
 impl Day4 {
     pub fn new() -> Day4 {
-        Day4 {}
+        Day4 { input: Vec::new() }
     }
+}
 
-    fn parse(&self, input: &[String]) -> Vec<(Section, Section)> {
-        input
+impl Solver for Day4 {
+    fn parse(&mut self, input: &[String]) {
+        self.input = input
             .iter()
             .map(|l| {
                 let (first, second) = l.split_once(',').unwrap();
@@ -46,26 +50,26 @@ impl Day4 {
                     second.parse::<Section>().unwrap(),
                 )
             })
-            .collect()
+            .collect();
     }
-}
 
-impl Solver for Day4 {
-    fn solve_part1(&self, input: &[String]) -> usize {
-        self.parse(input)
+    fn solve_part1(&self) -> String {
+        self.input
             .iter()
             .filter(|(first, second)| {
                 first.is_contained_by(second) || second.is_contained_by(first)
             })
             .count()
+            .to_string()
     }
-    fn solve_part2(&self, input: &[String]) -> usize {
-        self.parse(input)
+    fn solve_part2(&self) -> String {
+        self.input
             .iter()
             .filter(|(first, second)| {
                 first.is_overlapped_by(second) || second.is_contained_by(first)
             })
             .count()
+            .to_string()
     }
 }
 

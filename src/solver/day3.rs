@@ -30,6 +30,7 @@ impl RuckSack {
 
 pub struct Day3 {
     item_map: HashMap<char, usize>,
+    input: Vec<String>,
 }
 
 impl Day3 {
@@ -39,20 +40,27 @@ impl Day3 {
                 .chars()
                 .zip(1..53)
                 .collect(),
+            input: Vec::new(),
         }
     }
 }
 
 impl Solver for Day3 {
-    fn solve_part1(&self, input: &[String]) -> usize {
-        input
+    fn parse(&mut self, input: &[String]) {
+        self.input = input.to_owned();
+    }
+
+    fn solve_part1(&self) -> String {
+        self.input
             .iter()
             .map(|l| l.parse::<RuckSack>().unwrap().find_matching_item())
             .map(|i| self.item_map.get(&i).unwrap())
-            .sum()
+            .sum::<usize>()
+            .to_string()
     }
-    fn solve_part2(&self, input: &[String]) -> usize {
-        input
+
+    fn solve_part2(&self) -> String {
+        self.input
             .chunks(3)
             .map(|g| {
                 g[0].chars()
@@ -60,7 +68,8 @@ impl Solver for Day3 {
                     .unwrap()
             })
             .map(|i| self.item_map.get(&i).unwrap())
-            .sum()
+            .sum::<usize>()
+            .to_string()
     }
 }
 

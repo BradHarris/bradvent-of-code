@@ -1,54 +1,44 @@
 use super::Solver;
 
-#[derive(Debug)]
-struct Elf {
-    total_calories: usize,
+pub struct Day1 {
+    calorie_counts: Vec<u32>,
 }
-
-impl Elf {
-    fn new() -> Elf {
-        Elf { total_calories: 0 }
-    }
-}
-
-pub struct Day1 {}
 
 impl Day1 {
     pub fn new() -> Day1 {
-        Day1 {}
-    }
-
-    fn parse(&self, input: &[String]) -> Vec<Elf> {
-        let mut elves =
-            input
-                .iter()
-                .map(|l| l.parse::<usize>().ok())
-                .fold(vec![Elf::new()], |mut acc, n| {
-                    if let Some(n) = n {
-                        let elf = acc.last_mut().unwrap();
-                        elf.total_calories += n;
-                    } else {
-                        acc.push(Elf::new());
-                    }
-                    acc
-                });
-
-        elves.sort_by_key(|e| e.total_calories);
-        elves.reverse();
-        elves
+        Day1 {
+            calorie_counts: Vec::new(),
+        }
     }
 }
 
 impl Solver for Day1 {
-    fn solve_part1(&self, input: &[String]) -> usize {
-        let elves = self.parse(input);
+    fn parse(&mut self, input: &[String]) {
+        let mut calorie_counts =
+            input
+                .iter()
+                .map(|l| l.parse::<u32>().ok())
+                .fold(vec![0], |mut acc, n| {
+                    if let Some(n) = n {
+                        let total_calories = acc.last_mut().unwrap();
+                        *total_calories += n;
+                    } else {
+                        acc.push(0);
+                    }
+                    acc
+                });
 
-        elves.first().unwrap().total_calories
+        calorie_counts.sort();
+        calorie_counts.reverse();
+        self.calorie_counts = calorie_counts;
     }
-    fn solve_part2(&self, input: &[String]) -> usize {
-        let elves = self.parse(input);
 
-        elves[0..3].iter().map(|e| e.total_calories).sum()
+    fn solve_part1(&self) -> String {
+        self.calorie_counts.first().unwrap().to_string()
+    }
+
+    fn solve_part2(&self) -> String {
+        self.calorie_counts[0..3].iter().sum::<u32>().to_string()
     }
 }
 

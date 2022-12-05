@@ -81,29 +81,39 @@ impl FromStr for Round {
     }
 }
 
-pub struct Day2 {}
+pub struct Day2 {
+    input: Vec<(String, String)>,
+}
 
 impl Day2 {
     pub fn new() -> Day2 {
-        Day2 {}
+        Day2 { input: Vec::new() }
     }
 }
 
 impl Solver for Day2 {
-    fn solve_part1(&self, input: &[String]) -> usize {
-        input
+    fn parse(&mut self, input: &[String]) {
+        self.input = input
             .iter()
             .map(|l| {
-                let (enemy, you) = l.split_once(' ').unwrap();
-                (enemy.parse::<RPS>().unwrap(), you.parse::<RPS>().unwrap())
+                let (left, right) = l.split_once(' ').unwrap();
+                (left.to_owned(), right.to_owned())
             })
-            .fold(0, |acc, (enemy, you)| acc + you.score() + you.fight(enemy))
+            .collect();
     }
-    fn solve_part2(&self, input: &[String]) -> usize {
-        input
+
+    fn solve_part1(&self) -> String {
+        self.input
             .iter()
-            .map(|l| {
-                let (enemy, expected) = l.split_once(' ').unwrap();
+            .map(|(enemy, you)| (enemy.parse::<RPS>().unwrap(), you.parse::<RPS>().unwrap()))
+            .fold(0, |acc, (enemy, you)| acc + you.score() + you.fight(enemy))
+            .to_string()
+    }
+
+    fn solve_part2(&self) -> String {
+        self.input
+            .iter()
+            .map(|(enemy, expected)| {
                 (
                     enemy.parse::<RPS>().unwrap(),
                     expected.parse::<Round>().unwrap(),
@@ -116,6 +126,7 @@ impl Solver for Day2 {
                     Round::Win => enemy.lose_to().score() + 6,
                 }
             })
+            .to_string()
     }
 }
 
