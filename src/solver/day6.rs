@@ -3,35 +3,27 @@ use std::collections::HashSet;
 use super::Solver;
 
 pub struct Day6 {
-    input: Vec<String>,
+    input: String,
 }
 
 impl Day6 {
     pub fn new() -> Day6 {
-        Day6 { input: Vec::new() }
+        Day6 {
+            input: "".to_string(),
+        }
     }
 
     fn start_of_distinct_chars(&self, num_distinct: usize) -> usize {
-        let input = self.input.first().unwrap();
+        let chars = self.input.chars().collect::<Vec<char>>();
+        let mut chars = chars.windows(num_distinct);
 
-        let mut marker: Vec<char> = Vec::with_capacity(4);
-
-        let mut chars = input.chars();
-        let mut counter = 0;
+        let mut counter = num_distinct;
         while let Some(c) = chars.next() {
-            if marker.len() == num_distinct {
-                let unique_chars = marker
-                    .iter()
-                    .map(|c| c.clone())
-                    .collect::<HashSet<char>>()
-                    .len();
-                if unique_chars == num_distinct {
-                    break;
-                }
-
-                marker.remove(0);
+            let unique_chars = c.iter().collect::<HashSet<&char>>().len();
+            if unique_chars == num_distinct {
+                break;
             }
-            marker.push(c);
+
             counter += 1;
         }
 
@@ -41,7 +33,7 @@ impl Day6 {
 
 impl Solver for Day6 {
     fn parse(&mut self, input: &[String]) {
-        self.input = input.to_owned();
+        self.input = input.first().unwrap().to_owned();
     }
 
     fn solve_part1(&self) -> String {

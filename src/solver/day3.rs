@@ -13,8 +13,8 @@ impl FromStr for RuckSack {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let partition = s.len() / 2;
         Ok(RuckSack {
-            compartment_1: s[0..partition].to_string(),
-            compartment_2: s[partition..s.len()].to_string(),
+            compartment_1: s[..partition].to_string(),
+            compartment_2: s[partition..].to_string(),
         })
     }
 }
