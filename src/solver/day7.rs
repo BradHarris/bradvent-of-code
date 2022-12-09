@@ -18,9 +18,9 @@ impl From<&[String]> for Directory {
     fn from(input: &[String]) -> Self {
         let mut dir = Directory::default();
 
-        fn create_dir(input: &[String], dir: &mut Directory, posiion: &mut usize) -> usize {
-            while let Some(next) = input.get(*posiion) {
-                *posiion += 1;
+        fn create_dir(input: &[String], dir: &mut Directory, position: &mut usize) -> usize {
+            while let Some(next) = input.get(*position) {
+                *position += 1;
                 let com = next.parse::<Command>().unwrap();
                 match com {
                     Command::CD(name) => {
@@ -28,7 +28,7 @@ impl From<&[String]> for Directory {
                             return dir.size;
                         } else if name != "/" {
                             dir.size +=
-                                create_dir(input, dir.children.get_mut(&name).unwrap(), posiion);
+                                create_dir(input, dir.children.get_mut(&name).unwrap(), position);
                         }
                     }
                     Command::LS => {}
