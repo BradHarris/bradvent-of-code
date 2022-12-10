@@ -142,7 +142,7 @@ R 2"
     }
 
     #[test]
-    fn test_directory_from_string_array() {
+    fn test_parse() {
         let mut day9 = Day9::default();
         day9.parse(&get_input1()[..]);
         println!("{:#?}", day9.input);
