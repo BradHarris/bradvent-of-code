@@ -40,17 +40,14 @@ impl FromStr for Move {
     }
 }
 
-struct Vector(isize, isize);
-
 #[derive(Eq, Hash, PartialEq, Clone, Debug)]
 struct Position(isize, isize);
 
 impl Position {
     fn move_closer_to(&mut self, other: &Position) {
         if self.distance_to(other) >= 2.0 {
-            let diff = Vector(other.0 - self.0, other.1 - self.1);
-            self.0 += diff.0.signum();
-            self.1 += diff.1.signum();
+            self.0 += (other.0 - self.0).signum();
+            self.1 += (other.1 - self.1).signum();
         }
     }
 
