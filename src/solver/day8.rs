@@ -1,5 +1,3 @@
-use std::cmp::max;
-
 use super::Solver;
 
 enum Direction {
@@ -9,142 +7,59 @@ enum Direction {
     Right,
 }
 
-// represents the max height of neighbours given a direction
-#[derive(Debug)]
-struct Neighbours {
-    up: i8,
-    down: i8,
-    left: i8,
-    right: i8,
-}
-
-impl Default for Neighbours {
-    fn default() -> Self {
-        Self {
-            up: -1,
-            down: -1,
-            left: -1,
-            right: -1,
-        }
-    }
-}
-
-impl Neighbours {
-    fn set_max(&mut self, height: i8, dir: Direction) {
-        match dir {
-            Direction::Up => self.up = max(height, self.up),
-            Direction::Down => self.down = max(height, self.down),
-            Direction::Left => self.left = max(height, self.left),
-            Direction::Right => self.right = max(height, self.right),
-        };
-    }
-
-    fn get(&self, dir: Direction) -> i8 {
-        match dir {
-            Direction::Up => self.up,
-            Direction::Down => self.down,
-            Direction::Left => self.left,
-            Direction::Right => self.right,
-        }
-    }
-}
-
-#[derive(Default, Debug)]
-struct Tree {
-    height: i8,
-    neighbors: Neighbours,
-}
-
-impl Tree {
-    fn new(height: i8) -> Self {
-        Self {
-            height,
-            neighbors: Neighbours::default(),
-        }
-    }
-
-    fn set_neighbor_max(&mut self, height: i8, dir: Direction) {
-        self.neighbors.set_max(height, dir);
-    }
-
-    fn get_neighbor_max(&self, dir: Direction) -> i8 {
-        max(self.height, self.neighbors.get(dir))
-    }
-
-    fn is_visible(&self) -> bool {
-        self.height > self.neighbors.up
-            || self.height > self.neighbors.right
-            || self.height > self.neighbors.down
-            || self.height > self.neighbors.left
-    }
-}
+type Tree = u8;
 
 #[derive(Default, Debug)]
 struct Forest {
-    trees: Vec<Vec<Tree>>,
-    rows: usize,
-    cols: usize,
+    trees: Vec<Vec<u8>>,
+    rows_len: usize,
+    cols_len: usize,
 }
 
 impl Forest {
-    fn calc_max_heights(&mut self) {
-        for row in 0..self.rows {
-            for col in 0..self.cols {
-                let h_up = self
-                    .get(row as isize - 1, col as isize)
-                    .map(|t| t.get_neighbor_max(Direction::Up))
-                    .unwrap_or(-1);
-
-                self.get_mut(row as isize, col as isize)
-                    .unwrap()
-                    .set_neighbor_max(h_up, Direction::Up);
-
-                let h_down = self
-                    .get((self.rows - row) as isize, col as isize)
-                    .map(|t| t.get_neighbor_max(Direction::Down))
-                    .unwrap_or(-1);
-
-                self.get_mut((self.rows - (row + 1)) as isize, col as isize)
-                    .unwrap()
-                    .set_neighbor_max(h_down, Direction::Down);
-            }
-        }
-
-        for row in 0..self.rows {
-            for col in 0..self.cols {
-                let h_right = self
-                    .get(row as isize, col as isize - 1)
-                    .map(|t| t.get_neighbor_max(Direction::Right))
-                    .unwrap_or(-1);
-
-                self.get_mut(row as isize, col as isize)
-                    .unwrap()
-                    .set_neighbor_max(h_right, Direction::Right);
-
-                let h_left = self
-                    .get(row as isize, (self.cols - col) as isize)
-                    .map(|t| t.get_neighbor_max(Direction::Left))
-                    .unwrap_or(-1);
-
-                self.get_mut(row as isize, (self.cols - (col + 1)) as isize)
-                    .unwrap()
-                    .set_neighbor_max(h_left, Direction::Left);
-            }
-        }
+    fn iter_dir<'a>(&'a self, row: usize, col: usize, dir: &'a Direction) -> ForestDirectionalIter {
+        ForestDirectionalIter::new(self, row, col, dir)
     }
 
-    fn get(&self, row: isize, col: isize) -> Option<&Tree> {
-        if row < 0 || col < 0 {
-            return None;
-        }
+    fn get(&self, row: usize, col: usize) -> Option<&Tree> {
         self.trees.get(row as usize)?.get(col as usize)
     }
+}
 
-    fn get_mut(&mut self, row: isize, col: isize) -> Option<&mut Tree> {
-        if row < 0 || col < 0 {
+struct ForestDirectionalIter<'a> {
+    forest: &'a Forest,
+    row: isize,
+    col: isize,
+    dir: &'a Direction,
+}
+
+impl<'a> ForestDirectionalIter<'a> {
+    fn new(forest: &'a Forest, row: usize, col: usize, dir: &'a Direction) -> Self {
+        Self {
+            forest,
+            row: row as isize,
+            col: col as isize,
+            dir,
+        }
+    }
+}
+
+impl<'a> Iterator for ForestDirectionalIter<'a> {
+    type Item = &'a Tree;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.dir {
+            Direction::Up => self.row -= 1,
+            Direction::Down => self.row += 1,
+            Direction::Left => self.col -= 1,
+            Direction::Right => self.col += 1,
+        };
+
+        if self.row < 0 || self.col < 0 {
             return None;
         }
-        self.trees.get_mut(row as usize)?.get_mut(col as usize)
+
+        self.forest.get(self.row as usize, self.col as usize)
     }
 }
 
@@ -166,32 +81,85 @@ impl Solver for Day8 {
             .iter()
             .map(|l| {
                 l.chars()
-                    .map(|c| Tree::new(c.to_digit(10).unwrap() as i8))
+                    .map(|c| c.to_digit(10).unwrap() as Tree)
                     .collect::<Vec<Tree>>()
             })
             .collect::<Vec<Vec<Tree>>>();
-        self.forest.rows = self.forest.trees.len();
-        self.forest.cols = self.forest.trees.first().unwrap().len();
-
-        self.forest.calc_max_heights();
+        self.forest.rows_len = self.forest.trees.len();
+        self.forest.cols_len = self.forest.trees.first().unwrap().len();
     }
 
     fn solve_part1(&self) -> String {
-        let mut is_visible_count = 0;
-        for row in 0..self.forest.rows {
-            for col in 0..self.forest.cols {
-                let tree = self.forest.get(row as isize, col as isize).unwrap();
-                if tree.is_visible() {
-                    is_visible_count += 1;
-                }
-            }
-        }
+        let visible_trees = self
+            .forest
+            .trees
+            .iter()
+            .enumerate()
+            .flat_map(|(r, row)| {
+                row.iter().enumerate().filter(move |(c, tree)| {
+                    vec![
+                        Direction::Up,
+                        Direction::Down,
+                        Direction::Left,
+                        Direction::Right,
+                    ]
+                    .iter()
+                    .any(|dir| {
+                        let mut iter = self.forest.iter_dir(r, *c, dir).peekable();
 
-        is_visible_count.to_string()
+                        if iter.peek().is_none() {
+                            true
+                        } else {
+                            iter.all(|t| tree > &t)
+                        }
+                    })
+                })
+            })
+            .count();
+
+        visible_trees.to_string()
     }
 
     fn solve_part2(&self) -> String {
-        "not implemented!".to_string()
+        let mut scenic_scores = self
+            .forest
+            .trees
+            .iter()
+            .enumerate()
+            .flat_map(|(r, row)| {
+                row.iter()
+                    .enumerate()
+                    .map(|(c, tree)| {
+                        let scores = vec![
+                            Direction::Up,
+                            Direction::Down,
+                            Direction::Left,
+                            Direction::Right,
+                        ]
+                        .iter()
+                        .map(|dir| {
+                            let iter = self.forest.iter_dir(r, c, dir);
+
+                            let mut score = 0;
+                            for t in iter {
+                                score += 1;
+                                if t >= tree {
+                                    break;
+                                }
+                            }
+                            score
+                        })
+                        .collect::<Vec<usize>>();
+
+                        scores.iter().product()
+                    })
+                    .collect::<Vec<usize>>()
+            })
+            .collect::<Vec<usize>>();
+
+        scenic_scores.sort();
+
+        scenic_scores.last().unwrap().to_string()
     }
 }
 
@@ -227,12 +195,11 @@ mod test {
             day8.forest
                 .trees
                 .iter()
-                .map(|r| format!(
-                    "{:?}",
-                    r.iter()
-                        .map(|t| format!("{}{}", t.height, t.is_visible()))
-                        .collect::<Vec<String>>()
-                ))
+                .map(|r| r
+                    .iter()
+                    .map(|t| t.to_string())
+                    .collect::<Vec<String>>()
+                    .join(" "))
                 .collect::<Vec<String>>()
         );
     }
