@@ -15,10 +15,10 @@ impl Day6 {
 
     fn start_of_distinct_chars(&self, num_distinct: usize) -> usize {
         let chars = self.input.chars().collect::<Vec<char>>();
-        let mut chars = chars.windows(num_distinct);
+        let chars = chars.windows(num_distinct);
 
         let mut counter = num_distinct;
-        while let Some(c) = chars.next() {
+        for c in chars {
             let unique_chars = c.iter().collect::<HashSet<&char>>().len();
             if unique_chars == num_distinct {
                 break;

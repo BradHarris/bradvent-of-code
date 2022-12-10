@@ -94,7 +94,9 @@ impl FromStr for Command {
         } else if s.starts_with("dir") {
             Ok(Command::Dir(s.trim_start_matches("dir ").to_string()))
         } else {
-            let (size, _name) = s.split_once(' ').ok_or("damn you".to_string())?;
+            let (size, _name) = s
+                .split_once(' ')
+                .ok_or_else(|| "bad file descriptor!".to_string())?;
             let size = size.parse::<usize>().map_err(|e| e.to_string())?;
             Ok(Command::File(size))
         }
