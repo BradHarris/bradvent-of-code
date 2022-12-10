@@ -17,7 +17,7 @@ fn main() {
         Box::new(day6::Day6::new()),
         Box::new(day7::Day7::new()),
         Box::new(day8::Day8::new()),
-        // Box::new(day9::Day9::new()),
+        Box::new(day9::Day9::default()),
         // Box::new(day10::Day10::new()),
         // Box::new(day11::Day11::new()),
         // Box::new(day12::Day12::new()),
