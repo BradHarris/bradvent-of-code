@@ -1,5 +1,6 @@
 pub mod day1;
 pub mod day10;
+pub mod day11;
 pub mod day2;
 pub mod day3;
 pub mod day4;
@@ -8,7 +9,6 @@ pub mod day6;
 pub mod day7;
 pub mod day8;
 pub mod day9;
-// pub mod day11;
 // pub mod day12;
 // pub mod day13;
 // pub mod day14;
@@ -42,7 +42,7 @@ pub fn get_solvers() -> Vec<Box<dyn Solver>> {
         Box::new(day8::Day8::new()),
         Box::new(day9::Day9::default()),
         Box::new(day10::Day10::new()),
-        // Box::new(day11::Day11::new()),
+        Box::new(day11::Day11::new()),
         // Box::new(day12::Day12::new()),
         // Box::new(day13::Day13::new()),
         // Box::new(day14::Day14::new()),
