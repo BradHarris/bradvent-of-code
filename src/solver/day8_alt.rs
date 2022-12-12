@@ -167,9 +167,9 @@ impl Day8 {
 }
 
 impl Solver for Day8 {
-    fn parse(&mut self, input: &[String]) {
+    fn parse(&mut self, input: &str) {
         self.forest.trees = input
-            .iter()
+            .split('\n')
             .map(|l| {
                 l.chars()
                     .map(|c| Tree::new(c.to_digit(10).unwrap() as i8))
@@ -205,29 +205,26 @@ impl Solver for Day8 {
 mod test {
     use super::*;
 
-    fn get_input() -> Vec<String> {
+    fn get_input<'a>() -> &'a str {
         "\
 30373
 25512
 65332
 33549
 35390"
-            .split('\n')
-            .map(|s| s.to_string())
-            .collect::<Vec<String>>()
     }
 
     #[test]
     fn test_parse() {
         let mut day8 = Day8::new();
-        day8.parse(&get_input()[..]);
+        day8.parse(get_input());
         println!("{:#?}", day8.forest);
     }
 
     #[test]
     fn test_parse2() {
         let mut day8 = Day8::new();
-        day8.parse(&get_input()[..]);
+        day8.parse(get_input());
         println!(
             "{:#?}",
             day8.forest
@@ -246,7 +243,7 @@ mod test {
     #[test]
     fn test_solution_part1() {
         let mut day8 = Day8::new();
-        day8.parse(&get_input()[..]);
+        day8.parse(get_input());
         let solution = day8.solve_part1();
         println!("{:#?}", solution);
     }
@@ -254,7 +251,7 @@ mod test {
     #[test]
     fn test_solution_part2() {
         let mut day8 = Day8::new();
-        day8.parse(&get_input()[..]);
+        day8.parse(get_input());
         let solution = day8.solve_part2();
         println!("{:#?}", solution);
     }

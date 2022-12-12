@@ -42,9 +42,9 @@ impl Day10 {
 }
 
 impl Solver for Day10 {
-    fn parse(&mut self, input: &[String]) {
+    fn parse(&mut self, input: &str) {
         self.input = input
-            .iter()
+            .split('\n')
             .map(|l| l.parse().unwrap())
             .flat_map(|c| match c {
                 Command::Noop => vec![None],
@@ -113,7 +113,7 @@ impl Solver for Day10 {
 mod test {
     use super::*;
 
-    fn get_input() -> Vec<String> {
+    fn get_input<'a>() -> &'a str {
         "\
 addx 15
 addx -11
@@ -261,22 +261,19 @@ addx -11
 noop
 noop
 noop"
-            .split('\n')
-            .map(|s| s.to_string())
-            .collect::<Vec<String>>()
     }
 
     #[test]
     fn test_parse() {
         let mut day10 = Day10::default();
-        day10.parse(&get_input()[..]);
+        day10.parse(get_input());
         println!("{:#?}", day10.input);
     }
 
     #[test]
     fn test_solution_part1() {
         let mut day10 = Day10::new();
-        day10.parse(&get_input()[..]);
+        day10.parse(get_input());
         let solution = day10.solve_part1();
         assert_eq!(solution, "13140");
     }
@@ -284,7 +281,7 @@ noop"
     #[test]
     fn test_solution_part2() {
         let mut day10 = Day10::new();
-        day10.parse(&get_input()[..]);
+        day10.parse(get_input());
         let solution = day10.solve_part2();
         assert_eq!(
             solution,

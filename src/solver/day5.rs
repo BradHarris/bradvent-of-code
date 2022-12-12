@@ -15,8 +15,8 @@ impl Day5 {
 }
 
 impl Solver for Day5 {
-    fn parse(&mut self, input: &[String]) {
-        for line in input {
+    fn parse(&mut self, input: &str) {
+        for line in input.split('\n') {
             if line.is_empty() {
                 break;
             }
@@ -37,7 +37,7 @@ impl Solver for Day5 {
                 });
         }
 
-        for line in input {
+        for line in input.split('\n') {
             if !line.starts_with("move") {
                 continue;
             }

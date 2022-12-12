@@ -1,4 +1,4 @@
-use std::{collections::HashMap, str::FromStr};
+use std::{collections::HashMap, str::FromStr, vec::Drain};
 
 use super::Solver;
 
@@ -14,41 +14,41 @@ impl Directory {
     }
 }
 
-impl From<&[String]> for Directory {
-    fn from(input: &[String]) -> Self {
-        let mut dir = Directory::default();
-
-        fn create_dir(input: &[String], dir: &mut Directory, position: &mut usize) -> usize {
-            while let Some(next) = input.get(*position) {
-                *position += 1;
-                let com = next.parse::<Command>().unwrap();
-                match com {
-                    Command::CD(name) => {
-                        if name == ".." {
-                            return dir.size;
-                        } else if name != "/" {
-                            dir.size +=
-                                create_dir(input, dir.children.get_mut(&name).unwrap(), position);
-                        }
-                    }
-                    Command::LS => {}
-                    Command::Dir(name) => {
-                        dir.children.insert(
-                            name,
-                            Directory {
-                                children: HashMap::new(),
-                                size: 0,
-                            },
-                        );
-                    }
-                    Command::File(size) => dir.size += size,
-                };
+fn create_dir(input: &mut Drain<&str>, dir: &mut Directory) -> usize {
+    while let Some(next) = input.next() {
+        let com = next.parse::<Command>().unwrap();
+        match com {
+            Command::CD(name) => {
+                if name == ".." {
+                    return dir.size;
+                } else if name != "/" {
+                    dir.size += create_dir(input, dir.children.get_mut(&name).unwrap());
+                }
             }
+            Command::LS => {}
+            Command::Dir(name) => {
+                dir.children.insert(
+                    name,
+                    Directory {
+                        children: HashMap::new(),
+                        size: 0,
+                    },
+                );
+            }
+            Command::File(size) => dir.size += size,
+        };
+    }
 
-            dir.size
-        }
+    dir.size
+}
 
-        create_dir(input, &mut dir, &mut 0);
+impl From<&str> for Directory {
+    fn from(input: &str) -> Self {
+        let mut dir = Directory::default();
+        let mut lines = input.split('\n').collect::<Vec<&str>>();
+        let mut input = lines.drain(0..);
+
+        create_dir(&mut input, &mut dir);
         dir
     }
 }
@@ -116,7 +116,7 @@ impl Day7 {
 }
 
 impl Solver for Day7 {
-    fn parse(&mut self, input: &[String]) {
+    fn parse(&mut self, input: &str) {
         self.directory = Directory::from(input);
     }
 
@@ -152,7 +152,7 @@ impl Solver for Day7 {
 mod test {
     use super::*;
 
-    fn get_input() -> Vec<String> {
+    fn get_input<'a>() -> &'a str {
         "\
 $ cd /
 $ ls
@@ -177,21 +177,19 @@ $ ls
 8033020 d.log
 5626152 d.ext
 7214296 k"
-            .split('\n')
-            .map(|s| s.to_string())
-            .collect::<Vec<String>>()
     }
 
     #[test]
-    fn test_directory_from_string_array() {
-        let dir = Directory::from(&get_input()[..]);
-        assert_eq!(dir.size, 48381165);
+    fn test_parse() {
+        let mut day7 = Day7::new();
+        day7.parse(get_input());
+        assert_eq!(day7.directory.size, 48381165);
     }
 
     #[test]
     fn test_solution_part1() {
         let mut day7 = Day7::new();
-        day7.parse(&get_input()[..]);
+        day7.parse(get_input());
         let solution = day7.solve_part1();
         assert_eq!(solution, "95437");
     }
@@ -199,7 +197,7 @@ $ ls
     #[test]
     fn test_solution_part2() {
         let mut day7 = Day7::new();
-        day7.parse(&get_input()[..]);
+        day7.parse(get_input());
         let solution = day7.solve_part2();
         assert_eq!(solution, "24933642");
     }

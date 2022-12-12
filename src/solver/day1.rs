@@ -13,10 +13,10 @@ impl Day1 {
 }
 
 impl Solver for Day1 {
-    fn parse(&mut self, input: &[String]) {
+    fn parse(&mut self, input: &str) {
         let mut calorie_counts =
             input
-                .iter()
+                .split('\n')
                 .map(|l| l.parse::<u32>().ok())
                 .fold(vec![0], |mut acc, n| {
                     if let Some(n) = n {

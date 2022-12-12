@@ -40,9 +40,9 @@ impl Day4 {
 }
 
 impl Solver for Day4 {
-    fn parse(&mut self, input: &[String]) {
+    fn parse(&mut self, input: &str) {
         self.input = input
-            .iter()
+            .split('\n')
             .map(|l| {
                 let (first, second) = l.split_once(',').unwrap();
                 (

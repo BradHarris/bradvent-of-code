@@ -46,8 +46,8 @@ impl Day3 {
 }
 
 impl Solver for Day3 {
-    fn parse(&mut self, input: &[String]) {
-        self.input = input.to_owned();
+    fn parse(&mut self, input: &str) {
+        self.input = input.split('\n').map(|l| l.to_owned()).collect();
     }
 
     fn solve_part1(&self) -> String {

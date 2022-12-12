@@ -117,16 +117,9 @@ pub struct Day11 {
     input: Vec<Monkey>,
 }
 
-impl Day11 {
-    pub fn new() -> Day11 {
-        Day11 { input: Vec::new() }
-    }
-}
-
 impl Solver for Day11 {
-    fn parse(&mut self, input: &[String]) {
+    fn parse(&mut self, input: &str) {
         self.input = input
-            .join("\n")
             .split("\n\n")
             .map(|c| c.parse::<Monkey>().unwrap())
             .collect();
@@ -156,7 +149,6 @@ impl Solver for Day11 {
             }
         }
 
-        println!("{monkey_business:?}");
         monkey_business.sort();
         monkey_business.reverse();
         let solution = monkey_business[0] * monkey_business[1];
@@ -192,7 +184,6 @@ impl Solver for Day11 {
             }
         }
 
-        println!("{monkey_business:?}");
         monkey_business.sort();
         monkey_business.reverse();
         let solution = monkey_business[0] * monkey_business[1];
@@ -204,59 +195,56 @@ impl Solver for Day11 {
 mod test {
     use super::*;
 
-    fn get_input() -> Vec<String> {
+    fn get_input<'a>() -> &'a str {
         "\
-    Monkey 0:
-    Starting items: 79, 98
-    Operation: new = old * 19
-    Test: divisible by 23
-        If true: throw to monkey 2
-        If false: throw to monkey 3
+Monkey 0:
+Starting items: 79, 98
+Operation: new = old * 19
+Test: divisible by 23
+    If true: throw to monkey 2
+    If false: throw to monkey 3
 
-    Monkey 1:
-    Starting items: 54, 65, 75, 74
-    Operation: new = old + 6
-    Test: divisible by 19
-        If true: throw to monkey 2
-        If false: throw to monkey 0
+Monkey 1:
+Starting items: 54, 65, 75, 74
+Operation: new = old + 6
+Test: divisible by 19
+    If true: throw to monkey 2
+    If false: throw to monkey 0
 
-    Monkey 2:
-    Starting items: 79, 60, 97
-    Operation: new = old * old
-    Test: divisible by 13
-        If true: throw to monkey 1
-        If false: throw to monkey 3
+Monkey 2:
+Starting items: 79, 60, 97
+Operation: new = old * old
+Test: divisible by 13
+    If true: throw to monkey 1
+    If false: throw to monkey 3
 
-    Monkey 3:
-    Starting items: 74
-    Operation: new = old + 3
-    Test: divisible by 17
-        If true: throw to monkey 0
-        If false: throw to monkey 1"
-            .split('\n')
-            .map(|s| s.to_string())
-            .collect::<Vec<String>>()
+Monkey 3:
+Starting items: 74
+Operation: new = old + 3
+Test: divisible by 17
+    If true: throw to monkey 0
+    If false: throw to monkey 1"
     }
 
     #[test]
     fn debug_parse() {
         let mut day11 = Day11::default();
-        day11.parse(&get_input()[..]);
+        day11.parse(get_input());
         println!("{:#?}", day11.input);
     }
 
     #[test]
     fn test_solution_part1() {
-        let mut day11 = Day11::new();
-        day11.parse(&get_input()[..]);
+        let mut day11 = Day11::default();
+        day11.parse(get_input());
         let solution = day11.solve_part1();
         assert_eq!(solution, "10605");
     }
 
     #[test]
     fn test_solution_part2() {
-        let mut day11 = Day11::new();
-        day11.parse(&get_input()[..]);
+        let mut day11 = Day11::default();
+        day11.parse(get_input());
         let solution = day11.solve_part2();
         assert_eq!(solution, "2713310158");
     }

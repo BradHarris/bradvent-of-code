@@ -25,7 +25,7 @@ pub mod day9;
 // pub mod day25;
 
 pub trait Solver {
-    fn parse(&mut self, input: &[String]);
+    fn parse(&mut self, input: &str);
     fn solve_part1(&self) -> String;
     fn solve_part2(&self) -> String;
 }
@@ -42,7 +42,7 @@ pub fn get_solvers() -> Vec<Box<dyn Solver>> {
         Box::new(day8::Day8::new()),
         Box::new(day9::Day9::default()),
         Box::new(day10::Day10::new()),
-        Box::new(day11::Day11::new()),
+        Box::new(day11::Day11::default()),
         // Box::new(day12::Day12::new()),
         // Box::new(day13::Day13::new()),
         // Box::new(day14::Day14::new()),

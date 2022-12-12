@@ -79,8 +79,8 @@ pub struct Day9 {
 }
 
 impl Solver for Day9 {
-    fn parse(&mut self, input: &[String]) {
-        self.input = input.iter().map(|l| l.parse().unwrap()).collect();
+    fn parse(&mut self, input: &str) {
+        self.input = input.split('\n').map(|l| l.parse().unwrap()).collect();
     }
 
     fn solve_part1(&self) -> String {
@@ -126,7 +126,7 @@ impl Solver for Day9 {
 mod test {
     use super::*;
 
-    fn get_input1() -> Vec<String> {
+    fn get_input1<'a>() -> &'a str {
         "\
 R 4
 U 4
@@ -136,27 +136,24 @@ R 4
 D 1
 L 5
 R 2"
-        .split('\n')
-        .map(|s| s.to_string())
-        .collect::<Vec<String>>()
     }
 
     #[test]
     fn test_parse() {
         let mut day9 = Day9::default();
-        day9.parse(&get_input1()[..]);
+        day9.parse(get_input1());
         println!("{:#?}", day9.input);
     }
 
     #[test]
     fn test_solution_part1() {
         let mut day9 = Day9::default();
-        day9.parse(&get_input1()[..]);
+        day9.parse(get_input1());
         let solution = day9.solve_part1();
         assert_eq!(solution, "13");
     }
 
-    fn get_input2() -> Vec<String> {
+    fn get_input2<'a>() -> &'a str {
         "\
 R 5
 U 8
@@ -166,14 +163,11 @@ R 17
 D 10
 L 25
 U 20"
-            .split('\n')
-            .map(|s| s.to_string())
-            .collect::<Vec<String>>()
     }
     #[test]
     fn test_solution_part2() {
         let mut day9 = Day9::default();
-        day9.parse(&get_input2()[..]);
+        day9.parse(get_input2());
         let solution = day9.solve_part2();
         assert_eq!(solution, "36");
     }

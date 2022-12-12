@@ -92,9 +92,9 @@ impl Day2 {
 }
 
 impl Solver for Day2 {
-    fn parse(&mut self, input: &[String]) {
+    fn parse(&mut self, input: &str) {
         self.input = input
-            .iter()
+            .split('\n')
             .map(|l| {
                 let (left, right) = l.split_once(' ').unwrap();
                 (left.to_owned(), right.to_owned())
