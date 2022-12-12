@@ -1,20 +1,12 @@
 use super::Solver;
 
-pub struct Day5 {
+#[derive(Default)]
+pub struct Solution {
     stacks: Vec<Vec<char>>,
     moves: Vec<(usize, usize, usize)>,
 }
 
-impl Day5 {
-    pub fn new() -> Day5 {
-        Day5 {
-            stacks: Vec::new(),
-            moves: Vec::new(),
-        }
-    }
-}
-
-impl Solver for Day5 {
+impl Solver for Solution {
     fn parse(&mut self, input: &str) {
         for line in input.split('\n') {
             if line.is_empty() {

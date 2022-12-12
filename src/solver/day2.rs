@@ -81,17 +81,12 @@ impl FromStr for Round {
     }
 }
 
-pub struct Day2 {
+#[derive(Default)]
+pub struct Solution {
     input: Vec<(String, String)>,
 }
 
-impl Day2 {
-    pub fn new() -> Day2 {
-        Day2 { input: Vec::new() }
-    }
-}
-
-impl Solver for Day2 {
+impl Solver for Solution {
     fn parse(&mut self, input: &str) {
         self.input = input
             .split('\n')

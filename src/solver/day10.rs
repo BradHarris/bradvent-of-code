@@ -31,17 +31,11 @@ struct CPUState {
 }
 
 #[derive(Default)]
-pub struct Day10 {
+pub struct Solution {
     input: Vec<CPUState>,
 }
 
-impl Day10 {
-    pub fn new() -> Day10 {
-        Day10 { input: Vec::new() }
-    }
-}
-
-impl Solver for Day10 {
+impl Solver for Solution {
     fn parse(&mut self, input: &str) {
         self.input = input
             .split('\n')
@@ -265,24 +259,24 @@ noop"
 
     #[test]
     fn test_parse() {
-        let mut day10 = Day10::default();
-        day10.parse(get_input());
-        println!("{:#?}", day10.input);
+        let mut solver = Solution::default();
+        solver.parse(get_input());
+        println!("{:#?}", solver.input);
     }
 
     #[test]
     fn test_solution_part1() {
-        let mut day10 = Day10::new();
-        day10.parse(get_input());
-        let solution = day10.solve_part1();
+        let mut solver = Solution::default();
+        solver.parse(get_input());
+        let solution = solver.solve_part1();
         assert_eq!(solution, "13140");
     }
 
     #[test]
     fn test_solution_part2() {
-        let mut day10 = Day10::new();
-        day10.parse(get_input());
-        let solution = day10.solve_part2();
+        let mut solver = Solution::default();
+        solver.parse(get_input());
+        let solution = solver.solve_part2();
         assert_eq!(
             solution,
             "\n\n##..##..##..##..##..##..##..##..##..##..

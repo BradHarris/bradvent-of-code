@@ -29,17 +29,12 @@ impl FromStr for Section {
     }
 }
 
-pub struct Day4 {
+#[derive(Default)]
+pub struct Solution {
     input: Vec<(Section, Section)>,
 }
 
-impl Day4 {
-    pub fn new() -> Day4 {
-        Day4 { input: Vec::new() }
-    }
-}
-
-impl Solver for Day4 {
+impl Solver for Solution {
     fn parse(&mut self, input: &str) {
         self.input = input
             .split('\n')

@@ -103,19 +103,12 @@ impl FromStr for Command {
     }
 }
 
-pub struct Day7 {
+#[derive(Default)]
+pub struct Solution {
     directory: Directory,
 }
 
-impl Day7 {
-    pub fn new() -> Day7 {
-        Day7 {
-            directory: Directory::default(),
-        }
-    }
-}
-
-impl Solver for Day7 {
+impl Solver for Solution {
     fn parse(&mut self, input: &str) {
         self.directory = Directory::from(input);
     }
@@ -181,24 +174,24 @@ $ ls
 
     #[test]
     fn test_parse() {
-        let mut day7 = Day7::new();
-        day7.parse(get_input());
-        assert_eq!(day7.directory.size, 48381165);
+        let mut solver = Solution::default();
+        solver.parse(get_input());
+        assert_eq!(solver.directory.size, 48381165);
     }
 
     #[test]
     fn test_solution_part1() {
-        let mut day7 = Day7::new();
-        day7.parse(get_input());
-        let solution = day7.solve_part1();
+        let mut solver = Solution::default();
+        solver.parse(get_input());
+        let solution = solver.solve_part1();
         assert_eq!(solution, "95437");
     }
 
     #[test]
     fn test_solution_part2() {
-        let mut day7 = Day7::new();
-        day7.parse(get_input());
-        let solution = day7.solve_part2();
+        let mut solver = Solution::default();
+        solver.parse(get_input());
+        let solution = solver.solve_part2();
         assert_eq!(solution, "24933642");
     }
 }

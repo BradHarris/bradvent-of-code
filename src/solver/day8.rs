@@ -63,19 +63,12 @@ impl<'a> Iterator for ForestDirectionalIter<'a> {
     }
 }
 
-pub struct Day8 {
+#[derive(Default)]
+pub struct Solution {
     forest: Forest,
 }
 
-impl Day8 {
-    pub fn new() -> Day8 {
-        Day8 {
-            forest: Forest::default(),
-        }
-    }
-}
-
-impl Solver for Day8 {
+impl Solver for Solution {
     fn parse(&mut self, input: &str) {
         self.forest.trees = input
             .split('\n')
@@ -178,18 +171,19 @@ mod test {
 
     #[test]
     fn test_parse() {
-        let mut day8 = Day8::new();
-        day8.parse(get_input());
-        println!("{:#?}", day8.forest);
+        let mut solver = Solution::default();
+        solver.parse(get_input());
+        println!("{:#?}", solver.forest);
     }
 
     #[test]
     fn test_parse2() {
-        let mut day8 = Day8::new();
-        day8.parse(get_input());
+        let mut solver = Solution::default();
+        solver.parse(get_input());
         println!(
             "{:#?}",
-            day8.forest
+            solver
+                .forest
                 .trees
                 .iter()
                 .map(|r| r
@@ -203,17 +197,17 @@ mod test {
 
     #[test]
     fn test_solution_part1() {
-        let mut day8 = Day8::new();
-        day8.parse(get_input());
-        let solution = day8.solve_part1();
+        let mut solver = Solution::default();
+        solver.parse(get_input());
+        let solution = solver.solve_part1();
         println!("{:#?}", solution);
     }
 
     #[test]
     fn test_solution_part2() {
-        let mut day8 = Day8::new();
-        day8.parse(get_input());
-        let solution = day8.solve_part2();
+        let mut solver = Solution::default();
+        solver.parse(get_input());
+        let solution = solver.solve_part2();
         println!("{:#?}", solution);
     }
 }

@@ -2,17 +2,12 @@ use std::collections::HashSet;
 
 use super::Solver;
 
-pub struct Day6 {
+#[derive(Default)]
+pub struct Solution {
     input: String,
 }
 
-impl Day6 {
-    pub fn new() -> Day6 {
-        Day6 {
-            input: "".to_string(),
-        }
-    }
-
+impl Solution {
     fn start_of_distinct_chars(&self, num_distinct: usize) -> usize {
         let chars = self.input.chars().collect::<Vec<char>>();
         let chars = chars.windows(num_distinct);
@@ -31,7 +26,7 @@ impl Day6 {
     }
 }
 
-impl Solver for Day6 {
+impl Solver for Solution {
     fn parse(&mut self, input: &str) {
         self.input = input.to_owned();
     }

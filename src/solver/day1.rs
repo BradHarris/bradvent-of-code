@@ -1,18 +1,11 @@
 use super::Solver;
 
-pub struct Day1 {
+#[derive(Default)]
+pub struct Solution {
     calorie_counts: Vec<u32>,
 }
 
-impl Day1 {
-    pub fn new() -> Day1 {
-        Day1 {
-            calorie_counts: Vec::new(),
-        }
-    }
-}
-
-impl Solver for Day1 {
+impl Solver for Solution {
     fn parse(&mut self, input: &str) {
         let mut calorie_counts =
             input
@@ -43,4 +36,40 @@ impl Solver for Day1 {
 }
 
 #[cfg(test)]
-mod test {}
+mod test {
+    use super::*;
+
+    fn get_input<'a>() -> &'a str {
+        "\
+1000
+2000
+3000
+
+4000
+
+5000
+6000
+
+7000
+8000
+9000
+
+10000"
+    }
+
+    #[test]
+    fn test_solution_part1() {
+        let mut solver = Solution::default();
+        solver.parse(get_input());
+        let solution = solver.solve_part1();
+        assert_eq!(solution, "24000");
+    }
+
+    #[test]
+    fn test_solution_part2() {
+        let mut solver = Solution::default();
+        solver.parse(get_input());
+        let solution = solver.solve_part2();
+        assert_eq!(solution, "45000");
+    }
+}

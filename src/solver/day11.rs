@@ -113,11 +113,11 @@ impl FromStr for Monkey {
 }
 
 #[derive(Default, Clone)]
-pub struct Day11 {
+pub struct Solution {
     input: Vec<Monkey>,
 }
 
-impl Solver for Day11 {
+impl Solver for Solution {
     fn parse(&mut self, input: &str) {
         self.input = input
             .split("\n\n")
@@ -228,24 +228,24 @@ Test: divisible by 17
 
     #[test]
     fn debug_parse() {
-        let mut day11 = Day11::default();
-        day11.parse(get_input());
-        println!("{:#?}", day11.input);
+        let mut solver = Solution::default();
+        solver.parse(get_input());
+        println!("{:#?}", solver.input);
     }
 
     #[test]
     fn test_solution_part1() {
-        let mut day11 = Day11::default();
-        day11.parse(get_input());
-        let solution = day11.solve_part1();
+        let mut solver = Solution::default();
+        solver.parse(get_input());
+        let solution = solver.solve_part1();
         assert_eq!(solution, "10605");
     }
 
     #[test]
     fn test_solution_part2() {
-        let mut day11 = Day11::default();
-        day11.parse(get_input());
-        let solution = day11.solve_part2();
+        let mut solver = Solution::default();
+        solver.parse(get_input());
+        let solution = solver.solve_part2();
         assert_eq!(solution, "2713310158");
     }
 }

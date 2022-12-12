@@ -74,11 +74,11 @@ impl Display for Position {
 }
 
 #[derive(Default)]
-pub struct Day9 {
+pub struct Solution {
     input: Vec<Move>,
 }
 
-impl Solver for Day9 {
+impl Solver for Solution {
     fn parse(&mut self, input: &str) {
         self.input = input.split('\n').map(|l| l.parse().unwrap()).collect();
     }
@@ -140,16 +140,16 @@ R 2"
 
     #[test]
     fn test_parse() {
-        let mut day9 = Day9::default();
-        day9.parse(get_input1());
-        println!("{:#?}", day9.input);
+        let mut solver = Solution::default();
+        solver.parse(get_input1());
+        println!("{:#?}", solver.input);
     }
 
     #[test]
     fn test_solution_part1() {
-        let mut day9 = Day9::default();
-        day9.parse(get_input1());
-        let solution = day9.solve_part1();
+        let mut solver = Solution::default();
+        solver.parse(get_input1());
+        let solution = solver.solve_part1();
         assert_eq!(solution, "13");
     }
 
@@ -166,9 +166,9 @@ U 20"
     }
     #[test]
     fn test_solution_part2() {
-        let mut day9 = Day9::default();
-        day9.parse(get_input2());
-        let solution = day9.solve_part2();
+        let mut solver = Solution::default();
+        solver.parse(get_input2());
+        let solution = solver.solve_part2();
         assert_eq!(solution, "36");
     }
 }

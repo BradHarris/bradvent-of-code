@@ -28,25 +28,18 @@ impl RuckSack {
     }
 }
 
-pub struct Day3 {
+#[derive(Default)]
+pub struct Solution {
     item_map: HashMap<char, usize>,
     input: Vec<String>,
 }
 
-impl Day3 {
-    pub fn new() -> Day3 {
-        Day3 {
-            item_map: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                .chars()
-                .zip(1..53)
-                .collect(),
-            input: Vec::new(),
-        }
-    }
-}
-
-impl Solver for Day3 {
+impl Solver for Solution {
     fn parse(&mut self, input: &str) {
+        self.item_map = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+            .chars()
+            .zip(1..53)
+            .collect();
         self.input = input.split('\n').map(|l| l.to_owned()).collect();
     }
 
@@ -74,4 +67,32 @@ impl Solver for Day3 {
 }
 
 #[cfg(test)]
-mod test {}
+mod test {
+    use super::*;
+
+    fn get_input<'a>() -> &'a str {
+        "\
+vJrwpWtwJgWrhcsFMMfFFhFp
+jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
+PmmdzqPrVvPwwTWBwg
+wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
+ttgJtRGJQctTZtZT
+CrZsJsPPZsGzwwsLwLmpwMDw"
+    }
+
+    #[test]
+    fn test_solution_part1() {
+        let mut solver = Solution::default();
+        solver.parse(get_input());
+        let solution = solver.solve_part1();
+        assert_eq!(solution, "157");
+    }
+
+    #[test]
+    fn test_solution_part2() {
+        let mut solver = Solution::default();
+        solver.parse(get_input());
+        let solution = solver.solve_part2();
+        assert_eq!(solution, "70");
+    }
+}
