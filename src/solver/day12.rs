@@ -1,26 +1,130 @@
+use std::{
+    collections::{BinaryHeap, HashMap},
+    fmt::Display,
+    hash::Hash,
+};
+
 use super::Solver;
+
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
+struct Position(i16, i16);
 
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 struct Point {
-    x: u8,
-    y: u8,
-    h: u8,
+    position: Position,
+    height: u8,
 }
 
 #[derive(Default, Debug)]
 struct Grid(Vec<Vec<Point>>);
 
 impl Grid {
-    fn astar(&self, start: &Point, end: &Point) -> Vec<Point> {
-        Vec::new()
+    fn get(&self, pos: Position) -> Option<&Point> {
+        if pos.0 < 0 || pos.1 < 0 {
+            return None;
+        }
+
+        self.0.get(pos.1 as usize)?.get(pos.0 as usize)
+    }
+
+    fn neighbors(&self, cur: Position) -> Vec<Position> {
+        if let Some(Point {
+            position: Position(x, y),
+            height,
+        }) = self.get(cur)
+        {
+            [(*x, *y - 1), (*x, *y + 1), (*x - 1, *y), (*x + 1, *y)]
+                .iter()
+                .filter_map(|(x, y)| {
+                    self.get(Position(*x, *y))
+                        .filter(|p| p.height as i16 - *height as i16 <= 1)
+                        .map(|p| p.position)
+                })
+                .collect()
+        } else {
+            Vec::new()
+        }
+    }
+
+    fn heuristic(&self, a: Position, b: Position) -> i16 {
+        let Position(x1, y1) = a;
+        let Position(x2, y2) = b;
+        (x1 - x2).abs() + (y1 - y2).abs()
+    }
+
+    fn astar(&self, start: Position, end: Position) -> Vec<Position> {
+        let mut frontier: BinaryHeap<WeightedPosition> = BinaryHeap::from([WeightedPosition {
+            position: start,
+            weight: 0,
+        }]);
+        let mut came_from: HashMap<Position, Option<Position>> = HashMap::from([(start, None)]);
+        let mut cost_so_far: HashMap<Position, i16> = HashMap::from([(start, 0i16)]);
+
+        while let Some(current) = frontier.pop() {
+            if current.position == end {
+                break;
+            }
+
+            for next in self.neighbors(current.position) {
+                let new_cost = cost_so_far.get(&current.position).unwrap().to_owned() + 1;
+                if !cost_so_far.contains_key(&next) || new_cost < *cost_so_far.get(&next).unwrap() {
+                    cost_so_far
+                        .entry(next)
+                        .and_modify(|e| *e = new_cost)
+                        .or_insert(new_cost);
+
+                    let priority = new_cost + self.heuristic(next, end);
+                    frontier.push(WeightedPosition {
+                        position: next,
+                        weight: priority,
+                    });
+                    came_from.insert(next, Some(current.position));
+                }
+            }
+        }
+
+        let mut path = Vec::new();
+        if !came_from.contains_key(&end) {
+            return path;
+        }
+
+        let mut current = end;
+        while current != start {
+            path.push(current);
+            if let Some(Some(pos)) = came_from.get(&current) {
+                current = *pos;
+            }
+        }
+
+        path.reverse();
+        path
+    }
+}
+
+#[derive(PartialEq, Eq)]
+struct WeightedPosition {
+    position: Position,
+    weight: i16,
+}
+
+impl Ord for WeightedPosition {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.weight.cmp(&other.weight).reverse()
+    }
+}
+
+impl PartialOrd for WeightedPosition {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        self.weight.partial_cmp(&other.weight).map(|c| c.reverse())
     }
 }
 
 #[derive(Default, Debug)]
 pub struct Solution {
     grid: Grid,
-    start: Point,
-    end: Point,
+    start: Position,
+    alt_starts: Vec<Position>,
+    end: Position,
 }
 
 impl Solver for Solution {
@@ -33,15 +137,22 @@ impl Solver for Solution {
                     l.chars()
                         .enumerate()
                         .map(|(x, c)| {
-                            let p = Point {
-                                x: x as u8,
-                                y: y as u8,
-                                h: c as u8,
+                            let mut p = Point {
+                                position: Position(x as i16, y as i16),
+                                height: c as u8,
                             };
+                            if c == 'a' {
+                                self.alt_starts.push(p.position);
+                            }
                             if c == 'S' {
-                                self.start = p.clone();
+                                self.alt_starts.push(p.position);
+                                self.start = p.position;
+                                p.height = 0;
                             } else if c == 'E' {
-                                self.end = p.clone();
+                                self.end = p.position;
+                                p.height = 25;
+                            } else {
+                                p.height -= 97;
                             }
                             p
                         })
@@ -52,11 +163,30 @@ impl Solver for Solution {
     }
 
     fn solve_part1(&self) -> String {
-        self.grid.astar(&self.start, &self.end).len().to_string()
+        self.grid.astar(self.start, self.end).len().to_string()
     }
 
     fn solve_part2(&self) -> String {
-        "".to_string()
+        self.alt_starts
+            .iter()
+            .map(|start| self.grid.astar(*start, self.end).len())
+            .filter(|l| *l > 0)
+            .min()
+            .unwrap()
+            .to_string()
+    }
+}
+
+impl Display for Solution {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.grid.0.iter().for_each(|r| {
+            r.iter().for_each(|p| {
+                write!(f, " {:0>2} ", p.height).unwrap();
+            });
+            writeln!(f).unwrap();
+        });
+
+        Ok(())
     }
 }
 
@@ -77,7 +207,7 @@ abdefghi"
     fn test_parse() {
         let mut solver = Solution::default();
         solver.parse(get_input());
-        println!("{:#?}", solver);
+        println!("{}", solver);
     }
 
     #[test]
