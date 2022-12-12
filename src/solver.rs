@@ -7,6 +7,7 @@ pub mod day_template;
 pub mod day1;
 pub mod day10;
 pub mod day11;
+pub mod day12;
 pub mod day2;
 pub mod day3;
 pub mod day4;
@@ -15,7 +16,6 @@ pub mod day6;
 pub mod day7;
 pub mod day8;
 pub mod day9;
-// pub mod day12;
 // pub mod day13;
 // pub mod day14;
 // pub mod day15;
@@ -55,20 +55,20 @@ impl Solvers {
                 Box::new(day9::Solution::default()),
                 Box::new(day10::Solution::default()),
                 Box::new(day11::Solution::default()),
-                // Box::new(day12::Day12::new()),
-                // Box::new(day13::Day13::new()),
-                // Box::new(day14::Day14::new()),
-                // Box::new(day15::Day15::new()),
-                // Box::new(day16::Day16::new()),
-                // Box::new(day17::Day17::new()),
-                // Box::new(day18::Day18::new()),
-                // Box::new(day19::Day19::new()),
-                // Box::new(day20::Day20::new()),
-                // Box::new(day21::Day21::new()),
-                // Box::new(day22::Day22::new()),
-                // Box::new(day23::Day23::new()),
-                // Box::new(day24::Day24::new()),
-                // Box::new(day25::Day25::new()),
+                Box::new(day12::Solution::default()),
+                // Box::new(day13::Solution::default()),
+                // Box::new(day14::Solution::default()),
+                // Box::new(day15::Solution::default()),
+                // Box::new(day16::Solution::default()),
+                // Box::new(day17::Solution::default()),
+                // Box::new(day18::Solution::default()),
+                // Box::new(day19::Solution::default()),
+                // Box::new(day20::Solution::default()),
+                // Box::new(day21::Solution::default()),
+                // Box::new(day22::Solution::default()),
+                // Box::new(day23::Solution::default()),
+                // Box::new(day24::Solution::default()),
+                // Box::new(day25::Solution::default()),
             ],
         }
     }

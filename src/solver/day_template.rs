@@ -31,7 +31,7 @@ mod test {
     fn test_parse() {
         let mut solver = Solution::default();
         solver.parse(get_input());
-        println!("{:#?}", solver.input);
+        println!("{:#?}", solver);
     }
 
     #[test]
