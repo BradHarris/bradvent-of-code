@@ -1,34 +1,8 @@
 use std::time::Instant;
 
 use crate::utils::read_input;
-
-pub mod day_template;
-
-pub mod day1;
-pub mod day10;
-pub mod day11;
-pub mod day12;
-pub mod day2;
-pub mod day3;
-pub mod day4;
-pub mod day5;
-pub mod day6;
-pub mod day7;
-pub mod day8;
-pub mod day9;
-// pub mod day13;
-// pub mod day14;
-// pub mod day15;
-// pub mod day16;
-// pub mod day17;
-// pub mod day18;
-// pub mod day19;
-// pub mod day20;
-// pub mod day21;
-// pub mod day22;
-// pub mod day23;
-// pub mod day24;
-// pub mod day25;
+use crate::year_2022::*;
+// pub mod day_template;
 
 pub trait Solver {
     fn parse(&mut self, input: &str);
@@ -44,31 +18,31 @@ impl Solvers {
     pub fn new() -> Self {
         Self {
             solvers: vec![
-                Box::new(day1::Solution::default()),
-                Box::new(day2::Solution::default()),
-                Box::new(day3::Solution::default()),
-                Box::new(day4::Solution::default()),
-                Box::new(day5::Solution::default()),
-                Box::new(day6::Solution::default()),
-                Box::new(day7::Solution::default()),
-                Box::new(day8::Solution::default()),
-                Box::new(day9::Solution::default()),
-                Box::new(day10::Solution::default()),
-                Box::new(day11::Solution::default()),
-                Box::new(day12::Solution::default()),
-                // Box::new(day13::Solution::default()),
-                // Box::new(day14::Solution::default()),
-                // Box::new(day15::Solution::default()),
-                // Box::new(day16::Solution::default()),
-                // Box::new(day17::Solution::default()),
-                // Box::new(day18::Solution::default()),
-                // Box::new(day19::Solution::default()),
-                // Box::new(day20::Solution::default()),
-                // Box::new(day21::Solution::default()),
-                // Box::new(day22::Solution::default()),
-                // Box::new(day23::Solution::default()),
-                // Box::new(day24::Solution::default()),
-                // Box::new(day25::Solution::default()),
+                Box::new(day_01::Solution::default()),
+                Box::new(day_02::Solution::default()),
+                Box::new(day_03::Solution::default()),
+                Box::new(day_04::Solution::default()),
+                Box::new(day_05::Solution::default()),
+                Box::new(day_06::Solution::default()),
+                Box::new(day_07::Solution::default()),
+                Box::new(day_08::Solution::default()),
+                Box::new(day_09::Solution::default()),
+                Box::new(day_10::Solution::default()),
+                Box::new(day_11::Solution::default()),
+                Box::new(day_12::Solution::default()),
+                // Box::new(day_13::Solution::default()),
+                // Box::new(day_14::Solution::default()),
+                // Box::new(day_15::Solution::default()),
+                // Box::new(day_16::Solution::default()),
+                // Box::new(day_17::Solution::default()),
+                // Box::new(day_18::Solution::default()),
+                // Box::new(day_19::Solution::default()),
+                // Box::new(day_20::Solution::default()),
+                // Box::new(day_21::Solution::default()),
+                // Box::new(day_22::Solution::default()),
+                // Box::new(day_23::Solution::default()),
+                // Box::new(day_24::Solution::default()),
+                // Box::new(day_25::Solution::default()),
             ],
         }
     }
@@ -80,8 +54,9 @@ impl Solvers {
     }
 
     pub fn run(&mut self, day: usize) {
-        println!("\n--- DAY {} ---", day + 1);
-        let input = read_input(&format!("./src/input/day{}.txt", day + 1));
+        let d = day + 1;
+        println!("\n--- DAY {d:0>2} ---");
+        let input = read_input(&format!("./src/year_2022/day_{d:0>2}.txt"));
 
         let solver = self.solvers.get_mut(day).unwrap();
 

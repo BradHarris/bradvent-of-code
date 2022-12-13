@@ -1,6 +1,6 @@
 use std::{collections::HashMap, str::FromStr};
 
-use super::Solver;
+use crate::solver::Solver;
 
 #[derive(Debug)]
 struct RuckSack {

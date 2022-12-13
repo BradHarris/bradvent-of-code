@@ -1,6 +1,6 @@
 use std::{cell::RefCell, str::FromStr};
 
-use super::Solver;
+use crate::solver::Solver;
 
 #[derive(Debug, Clone)]
 enum Op {

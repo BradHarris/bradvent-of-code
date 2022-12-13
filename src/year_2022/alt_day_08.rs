@@ -6,7 +6,7 @@
  */
 use std::cmp::max;
 
-use super::Solver;
+use crate::solver::Solver;
 
 enum Direction {
     Up,

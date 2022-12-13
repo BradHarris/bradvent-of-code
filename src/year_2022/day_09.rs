@@ -1,6 +1,6 @@
 use std::{collections::HashSet, fmt::Display, primitive::f32, str::FromStr};
 
-use super::Solver;
+use crate::solver::Solver;
 
 #[derive(Debug)]
 enum Direction {

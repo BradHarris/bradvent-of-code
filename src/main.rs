@@ -2,6 +2,8 @@ use solver::Solvers;
 
 mod solver;
 mod utils;
+mod year_2021;
+mod year_2022;
 
 fn main() {
     let mut solvers = Solvers::new();

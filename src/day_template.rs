@@ -50,3 +50,5 @@ mod test {
         assert_eq!(solution, "");
     }
 }
+
+const INPUT: &'static str = "";

@@ -4,7 +4,7 @@ use std::{
     hash::Hash,
 };
 
-use super::Solver;
+use crate::solver::Solver;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 struct Position(i16, i16);

@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use super::Solver;
+use crate::solver::Solver;
 
 #[derive(Default)]
 pub struct Solution {

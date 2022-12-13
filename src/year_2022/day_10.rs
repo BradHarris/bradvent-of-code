@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use super::Solver;
+use crate::solver::Solver;
 
 #[derive(Debug)]
 enum Command {

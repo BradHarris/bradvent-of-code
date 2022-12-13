@@ -1,6 +1,6 @@
 use std::{collections::HashMap, str::FromStr, vec::Drain};
 
-use super::Solver;
+use crate::solver::Solver;
 
 #[derive(Debug, Default)]
 struct Directory {

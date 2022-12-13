@@ -1,4 +1,4 @@
-use super::Solver;
+use crate::solver::Solver;
 
 enum Direction {
     Up,
