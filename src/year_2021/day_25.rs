@@ -14,7 +14,11 @@ pub struct Solution {
 }
 
 impl Solver for Solution {
-    fn parse(&mut self, input: &str) {
+    fn get_input(&self) -> &'static str {
+        INPUT
+    }
+
+    fn with_input(&mut self, input: &str) {
         input.split('\n').enumerate().for_each(|(y, row)| {
             self.height += 1;
             self.width = row.trim().len();
@@ -97,7 +101,7 @@ v.v..>>v.v
     #[test]
     fn test_parse() {
         let mut solver = Solution::default();
-        solver.parse(get_input());
+        solver.with_input(get_input());
         for y in 0..solver.height {
             for x in 0..solver.width {
                 if solver.east_cukes.contains(&Pos(x, y)) {
@@ -116,7 +120,7 @@ v.v..>>v.v
     #[test]
     fn test_solution_example1() {
         let mut solver = Solution::default();
-        solver.parse(get_input());
+        solver.with_input(get_input());
         let solution = solver.solve_part1();
         assert_eq!(solution, "58");
     }
@@ -124,7 +128,7 @@ v.v..>>v.v
     #[test]
     fn test_solution_example2() {
         let mut solver = Solution::default();
-        solver.parse(get_input());
+        solver.with_input(get_input());
         let solution = solver.solve_part2();
         assert_eq!(solution, "");
     }
@@ -132,13 +136,14 @@ v.v..>>v.v
     #[test]
     fn test_solution_solution1() {
         let mut solver = Solution::default();
-        solver.parse(INPUT);
+        solver.with_input(solver.get_input());
         let solution = solver.solve_part1();
         println!("{solution}");
         assert_eq!(solution, "601");
     }
+}
 
-    const INPUT: &'static str = "\
+const INPUT: &'static str = "\
 .>vv..v..>v..>.>..>>.>.v>..v.v.vv>..v.>.>vv.v..v..>.vv.>>.vv.vv>.....>..v.v>.>>v>...v.vv..>>.v........>v.v.v>v.v.v.>vv>.v>vv>..>>>vvv...v>.
 .vv...>.v.....>.....v>.v>v..>>.>>vv....>.v>v.v>........>.....>..v..>.>..>v>v>vv>..v.>v.>v..>.>v......>.>>>>v>.v.>.>.vv...>v.>.v>.vv.vv>.>.v
 >.v>.vv..>.v...>v.>v.v.vv.>vv.....v.>v...v.v.v>....>..>v.>>.>.vv....>.v....v..v>>...>v.>...>..>.v>>v>....vv..>>v>>>>>>..v.....>..>>..v.....
@@ -276,4 +281,3 @@ v>>.vv>vvv>.......>vvv..v.v..>>..v.>v>.vv>.>>v>...v>.v.v>v.>.>...>...>..v.>v....
 v.v.v>...>.....v.v...v.v..>.v>.vv>v.........>..v>.v..vv>..>.v>v.v>..v.>...>..>v>v>..........>.>...v>.v...>..>v..v>....>..vv..>>...>..vv..>>
 v>......v.>..v.>...v..>v......v..v.>..>..>v...>..v....vvv...>.vv....>.>>.>....>v.>>>>>.v.vv..>>>>>>..>v..>.v....v.>v.vvv>>>...v....v..vv..>
 >.vv.....v>v.v.v>v>.v>>v..>.v..v..>..>.....>.v.v.>>>..v..v>...v...>...>....vv.>v..vv....v.v>>v>vv..v..v.v>v.>v>vv>.........>.vvv..v.v>>..>.";
-}

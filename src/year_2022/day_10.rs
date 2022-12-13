@@ -36,7 +36,11 @@ pub struct Solution {
 }
 
 impl Solver for Solution {
-    fn parse(&mut self, input: &str) {
+    fn get_input(&self) -> &'static str {
+        INPUT
+    }
+
+    fn with_input(&mut self, input: &str) {
         self.input = input
             .split('\n')
             .map(|l| l.parse().unwrap())
@@ -260,14 +264,14 @@ noop"
     #[test]
     fn test_parse() {
         let mut solver = Solution::default();
-        solver.parse(get_input());
+        solver.with_input(get_input());
         println!("{:#?}", solver.input);
     }
 
     #[test]
     fn test_solution_part1() {
         let mut solver = Solution::default();
-        solver.parse(get_input());
+        solver.with_input(get_input());
         let solution = solver.solve_part1();
         assert_eq!(solution, "13140");
     }
@@ -275,7 +279,7 @@ noop"
     #[test]
     fn test_solution_part2() {
         let mut solver = Solution::default();
-        solver.parse(get_input());
+        solver.with_input(get_input());
         let solution = solver.solve_part2();
         assert_eq!(
             solution,
@@ -288,3 +292,146 @@ noop"
         );
     }
 }
+
+const INPUT: &'static str = "noop
+noop
+noop
+addx 3
+addx 20
+noop
+addx -12
+noop
+addx 4
+noop
+noop
+noop
+addx 1
+addx 2
+addx 5
+addx 16
+addx -14
+addx -25
+addx 30
+addx 1
+noop
+addx 5
+noop
+addx -38
+noop
+noop
+noop
+addx 3
+addx 2
+noop
+noop
+noop
+addx 5
+addx 5
+addx 2
+addx 13
+addx 6
+addx -16
+addx 2
+addx 5
+addx -15
+addx 16
+addx 7
+noop
+addx -2
+addx 2
+addx 5
+addx -39
+addx 4
+addx -2
+addx 2
+addx 7
+noop
+addx -2
+addx 17
+addx -10
+noop
+noop
+addx 5
+addx -1
+addx 6
+noop
+addx -2
+addx 5
+addx -8
+addx 12
+addx 3
+addx -2
+addx -19
+addx -16
+addx 2
+addx 5
+noop
+addx 25
+addx 7
+addx -29
+addx 3
+addx 4
+addx -4
+addx 9
+noop
+addx 2
+addx -20
+addx 23
+addx 1
+noop
+addx 5
+addx -10
+addx 14
+addx 2
+addx -1
+addx -38
+noop
+addx 20
+addx -15
+noop
+addx 7
+noop
+addx 26
+addx -25
+addx 2
+addx 7
+noop
+noop
+addx 2
+addx -5
+addx 6
+addx 5
+addx 2
+addx 8
+addx -3
+noop
+addx 3
+addx -2
+addx -38
+addx 13
+addx -6
+noop
+addx 1
+addx 5
+noop
+noop
+noop
+noop
+addx 2
+noop
+noop
+addx 7
+addx 3
+addx -2
+addx 2
+addx 5
+addx 2
+noop
+addx 1
+addx 5
+noop
+noop
+noop
+noop
+noop
+noop";
