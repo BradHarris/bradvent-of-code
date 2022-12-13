@@ -1,5 +1,5 @@
 #!/bin/bash
 
-touch ./src/input/day$1.txt
+touch ./src/year_2022/day_$1.txt
 
-cp ./src/solver/day_template.rs ./src/solver/day$1.rs
+cp ./src/day_template.rs ./src/year_2022/day_$1.rs
