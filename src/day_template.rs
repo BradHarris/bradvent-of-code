@@ -78,4 +78,4 @@ mod test {
     }
 }
 
-const INPUT: &'static str = "";
+const INPUT: &str = "";

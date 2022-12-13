@@ -118,7 +118,7 @@ forward 2"
     }
 }
 
-const INPUT: &'static str = "\
+const INPUT: &str = "\
 forward 6
 down 3
 forward 8

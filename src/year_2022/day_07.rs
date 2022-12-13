@@ -200,7 +200,7 @@ $ ls
     }
 }
 
-const INPUT: &'static str = "$ cd /
+const INPUT: &str = "$ cd /
 $ ls
 dir cwdpn
 dir drzllllv

@@ -78,7 +78,7 @@ mod test {
     }
 }
 
-const INPUT: &'static str = "\
+const INPUT: &str = "\
 2027
 1630
 4699

@@ -2,7 +2,6 @@ use solver::Solvers;
 
 mod day_template;
 mod solver;
-mod utils;
 mod year_2020;
 mod year_2021;
 mod year_2022;

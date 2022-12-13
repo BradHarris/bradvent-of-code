@@ -31,14 +31,10 @@ impl Solver for Solution {
             .input
             .iter()
             .find_map(|x1| {
-                if let Some(v) = self.input.iter().find(|x2| {
+                self.input.iter().find(|x2| {
                     self.input
                         .contains(&(target - x1.to_owned() - x2.to_owned()))
-                }) {
-                    Some((x1, v))
-                } else {
-                    None
-                }
+                }).map(|v| (x1, v))
             })
             .unwrap();
         (v1 * v2 * (target - v1 - v2)).to_string()
@@ -93,7 +89,7 @@ mod test {
     }
 }
 
-const INPUT: &'static str = "\
+const INPUT: &str = "\
 1914
 1931
 1892

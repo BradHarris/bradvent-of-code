@@ -254,7 +254,7 @@ Test: divisible by 17
     }
 }
 
-const INPUT: &'static str = "Monkey 0:
+const INPUT: &str = "Monkey 0:
 Starting items: 54, 82, 90, 88, 86, 54
 Operation: new = old * 7
 Test: divisible by 11

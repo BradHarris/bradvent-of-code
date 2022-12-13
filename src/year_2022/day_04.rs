@@ -75,7 +75,7 @@ impl Solver for Solution {
 #[cfg(test)]
 mod test {}
 
-const INPUT: &'static str = "71-89,66-70
+const INPUT: &str = "71-89,66-70
 24-70,23-55
 19-85,18-86
 50-90,50-95

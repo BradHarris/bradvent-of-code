@@ -177,7 +177,7 @@ U 20"
     }
 }
 
-const INPUT: &'static str = "R 2
+const INPUT: &str = "R 2
 D 2
 U 1
 D 2

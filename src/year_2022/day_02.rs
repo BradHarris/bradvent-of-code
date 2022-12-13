@@ -184,7 +184,7 @@ mod test {
     }
 }
 
-const INPUT: &'static str = "A Z
+const INPUT: &str = "A Z
 A Z
 A Z
 B Z

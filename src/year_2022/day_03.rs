@@ -101,7 +101,7 @@ CrZsJsPPZsGzwwsLwLmpwMDw"
     }
 }
 
-const INPUT: &'static str = "QJRBMDMtRDCtJzBtJMfjNjhwvmNDvwjLVVgh
+const INPUT: &str = "QJRBMDMtRDCtJzBtJMfjNjhwvmNDvwjLVVgh
 TPSNNPZGTjgmSmvfjL
 bPlpZZbpsTlTsWprpGFCJtRtzMNdMMBBcWnJQB
 tppvbQBhpQQdrzMMcLwhMc

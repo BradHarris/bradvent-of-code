@@ -293,7 +293,7 @@ noop"
     }
 }
 
-const INPUT: &'static str = "noop
+const INPUT: &str = "noop
 noop
 noop
 addx 3

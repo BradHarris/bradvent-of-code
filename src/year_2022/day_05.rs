@@ -89,7 +89,7 @@ impl Solver for Solution {
 #[cfg(test)]
 mod test {}
 
-const INPUT: &'static str = "[P]     [C]         [M]
+const INPUT: &str = "[P]     [C]         [M]
 [D]     [P] [B]     [V] [S]
 [Q] [V] [R] [V]     [G] [B]
 [R] [W] [G] [J]     [T] [M]     [V]

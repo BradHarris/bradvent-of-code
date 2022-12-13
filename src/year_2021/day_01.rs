@@ -102,7 +102,7 @@ mod test {
     }
 }
 
-const INPUT: &'static str = "\
+const INPUT: &str = "\
 191
 192
 201
