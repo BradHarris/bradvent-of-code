@@ -1,4 +1,4 @@
-use super::Solver;
+use crate::solver::Solver;
 
 #[derive(Default, Debug)]
 pub struct Solution {
@@ -35,7 +35,7 @@ mod test {
     }
 
     #[test]
-    fn test_solution_part1() {
+    fn test_solution_example1() {
         let mut solver = Solution::default();
         solver.parse(get_input());
         let solution = solver.solve_part1();
@@ -43,9 +43,25 @@ mod test {
     }
 
     #[test]
-    fn test_solution_part2() {
+    fn test_solution_example2() {
         let mut solver = Solution::default();
         solver.parse(get_input());
+        let solution = solver.solve_part2();
+        assert_eq!(solution, "");
+    }
+
+    #[test]
+    fn test_solution_part1() {
+        let mut solver = Solution::default();
+        solver.parse(INPUT);
+        let solution = solver.solve_part1();
+        assert_eq!(solution, "");
+    }
+
+    #[test]
+    fn test_solution_part2() {
+        let mut solver = Solution::default();
+        solver.parse(INPUT);
         let solution = solver.solve_part2();
         assert_eq!(solution, "");
     }
