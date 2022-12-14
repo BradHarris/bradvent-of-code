@@ -1,4 +1,4 @@
-use std::cmp::Ordering;
+use std::{cmp::Ordering, vec::Drain};
 
 use crate::solver::Solver;
 
@@ -81,6 +81,34 @@ impl PartialOrd for PacketPart {
     }
 }
 
+#[derive(Debug)]
+enum Packet {
+    List(Vec<Box<Packet>>),
+    Value(u8),
+}
+
+fn create_packet(tokens: &mut Drain<Token>) -> Packet {
+    let mut packets: Vec<Box<Packet>> = Vec::new();
+    while let Some(next) = tokens.next() {
+        match next {
+            Token::Start => packets.push(Box::new(create_packet(tokens))),
+            Token::Value(amt) => packets.push(Box::new(Packet::Value(amt))),
+            Token::End => return Packet::List(packets),
+        };
+    }
+
+    Packet::List(packets)
+}
+
+impl From<PacketPart> for Packet {
+    fn from(p: PacketPart) -> Self {
+        let mut tokens = p.iter().collect::<Vec<Token>>();
+        let mut tokens = tokens.drain(0..);
+        tokens.next();
+        create_packet(&mut tokens)
+    }
+}
+
 #[derive(Default, Debug)]
 pub struct Solution {
     input: Vec<(PacketPart, PacketPart)>,
@@ -159,8 +187,8 @@ mod test {
         get_input().split("\n\n").for_each(|l| {
             let (left, right) = l.split_once('\n').unwrap();
 
-            let mut left = left.chars().collect::<Vec<char>>();
-            let mut right = right.chars().collect::<Vec<char>>();
+            let left = Packet::from(PacketPart(left.to_string()));
+            let right = Packet::from(PacketPart(right.to_string()));
 
             println!("{left:?}");
             println!("{right:?}\n\n");
