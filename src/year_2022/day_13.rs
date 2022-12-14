@@ -1,8 +1,89 @@
+use std::cmp::Ordering;
+
 use crate::solver::Solver;
+
+#[derive(PartialEq, Eq)]
+enum Token {
+    Start,
+    End,
+    Value(u8),
+}
+
+struct PacketPartIter {
+    packet: Vec<char>,
+    pos: usize,
+}
+
+impl Iterator for PacketPartIter {
+    type Item = Token;
+    fn next(&mut self) -> Option<Self::Item> {
+        let next = self.packet.get(self.pos)?;
+        self.pos += 1;
+        match next {
+            ',' => self.next(),
+            '[' => Some(Token::Start),
+            ']' => Some(Token::End),
+            _ => {
+                let amt = next.to_digit(11)? as u8;
+                return Some(Token::Value(amt));
+            }
+        }
+    }
+}
+
+#[derive(PartialEq, Debug)]
+struct PacketPart(String);
+
+impl PacketPart {
+    fn iter(&self) -> PacketPartIter {
+        PacketPartIter {
+            packet: self.0.replace("10", "a").chars().collect(),
+            pos: 0,
+        }
+    }
+}
+
+impl PartialOrd for PacketPart {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        let mut left_iter = self.iter();
+        let mut right_iter = other.iter();
+
+        let mut left = left_iter.next();
+        let mut right = right_iter.next();
+
+        while let Some(l) = &left {
+            if let Some(r) = &right {
+                if l == r {
+                    left = left_iter.next();
+                    right = right_iter.next();
+                    continue;
+                }
+
+                match (l, r) {
+                    (Token::Value(l), Token::Value(r)) => return Some(l.cmp(r)),
+                    (Token::End, _) => return Some(Ordering::Less),
+                    (_, Token::End) => return Some(Ordering::Greater),
+                    (Token::Start, _) => {
+                        left = left_iter.next();
+                        continue;
+                    }
+                    (_, Token::Start) => {
+                        right = right_iter.next();
+                        continue;
+                    }
+                }
+            } else {
+                return Some(Ordering::Greater);
+            }
+        }
+
+        Some(Ordering::Equal)
+    }
+}
 
 #[derive(Default, Debug)]
 pub struct Solution {
-    input: String,
+    input: Vec<(PacketPart, PacketPart)>,
 }
 
 impl Solver for Solution {
@@ -11,11 +92,30 @@ impl Solver for Solution {
     }
 
     fn with_input(&mut self, input: &str) {
-        self.input = input.to_owned();
+        self.input = input
+            .split("\n\n")
+            .map(|l| {
+                let (left, right) = l.split_once('\n').unwrap();
+                (PacketPart(left.to_string()), PacketPart(right.to_string()))
+            })
+            .collect();
     }
 
     fn solve_part1(&self) -> String {
-        "".to_string()
+        self.input
+            .iter()
+            .enumerate()
+            .fold(
+                0,
+                |acc, (i, (left, right))| {
+                    if left < right {
+                        acc + i + 1
+                    } else {
+                        acc
+                    }
+                },
+            )
+            .to_string()
     }
 
     fn solve_part2(&self) -> String {
@@ -55,6 +155,19 @@ mod test {
     }
 
     #[test]
+    fn test_thing() {
+        get_input().split("\n\n").for_each(|l| {
+            let (left, right) = l.split_once('\n').unwrap();
+
+            let mut left = left.chars().collect::<Vec<char>>();
+            let mut right = right.chars().collect::<Vec<char>>();
+
+            println!("{left:?}");
+            println!("{right:?}\n\n");
+        })
+    }
+
+    #[test]
     fn test_parse() {
         let mut solver = Solution::default();
         solver.with_input(get_input());
@@ -66,7 +179,7 @@ mod test {
         let mut solver = Solution::default();
         solver.with_input(get_input());
         let solution = solver.solve_part1();
-        assert_eq!(solution, "");
+        assert_eq!(solution, "13");
     }
 
     #[test]
@@ -94,7 +207,8 @@ mod test {
     }
 }
 
-const INPUT: &str = "[[[6,10],[4,3,[4]]]]
+const INPUT: &str = "\
+[[[6,10],[4,3,[4]]]]
 [[4,3,[[4,9,9,7]]]]
 
 [[6,[[3,10],[],[],2,10],[[6,8,4,2]]],[]]
@@ -542,5 +656,4 @@ const INPUT: &str = "[[[6,10],[4,3,[4]]]]
 [[4,3,1],[[[0,5],1,[8,2,9,9],3,1]],[7,[[6,1,6,0,9],[0],[7,6],[],7],2,[9,7,[8,9,7,9,4],9]],[[[9,8,8,7,2],[5,7,10,9]],[],[2]],[]]
 
 [[8,[0]],[6,5,[],[1,1,[7,9,8,5],1]]]
-[[[[9],[10,4,7,0],[5,6],[7,3,6,0,10]]],[],[[[9,8,10,4,2],[1,6,1],10],3]]
-";
+[[[[9],[10,4,7,0],[5,6],[7,3,6,0,10]]],[],[[[9,8,10,4,2],[1,6,1],10],3]]";
