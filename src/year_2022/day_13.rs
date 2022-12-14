@@ -1,6 +1,5 @@
-use std::{cmp::Ordering, vec::Drain};
-
 use crate::solver::Solver;
+use std::{cmp::Ordering, ops::Index, vec::Drain};
 
 #[derive(PartialEq, Eq)]
 enum Token {
@@ -12,6 +11,15 @@ enum Token {
 struct PacketPartIter {
     packet: Vec<char>,
     pos: usize,
+}
+
+impl From<&str> for PacketPartIter {
+    fn from(s: &str) -> Self {
+        PacketPartIter {
+            packet: s.replace("10", "a").chars().collect(),
+            pos: 0,
+        }
+    }
 }
 
 impl Iterator for PacketPartIter {
@@ -27,18 +35,6 @@ impl Iterator for PacketPartIter {
                 let amt = next.to_digit(11)? as u8;
                 return Some(Token::Value(amt));
             }
-        }
-    }
-}
-
-#[derive(PartialEq, Debug)]
-struct PacketPart(String);
-
-impl PacketPart {
-    fn iter(&self) -> PacketPartIter {
-        PacketPartIter {
-            packet: self.0.replace("10", "a").chars().collect(),
-            pos: 0,
         }
     }
 }
@@ -62,9 +58,10 @@ fn create_packet(tokens: &mut Drain<Token>) -> Packet {
     Packet::List(packets)
 }
 
-impl From<PacketPart> for Packet {
-    fn from(p: PacketPart) -> Self {
-        let mut tokens = p.iter().collect::<Vec<Token>>();
+impl From<&str> for Packet {
+    fn from(s: &str) -> Self {
+        let p: PacketPartIter = s.into();
+        let mut tokens = p.collect::<Vec<Token>>();
         let mut tokens = tokens.drain(0..);
         tokens.next();
         create_packet(&mut tokens)
@@ -109,6 +106,12 @@ impl PartialOrd for Packet {
     }
 }
 
+impl Packet {
+    fn list(packets: &[Packet]) -> Packet {
+        Packet::List(packets.iter().map(|p| Box::new(p.to_owned())).collect())
+    }
+}
+
 #[derive(Default, Debug)]
 pub struct Solution {
     input: Vec<Packet>,
@@ -123,7 +126,7 @@ impl Solver for Solution {
         self.input = input
             .lines()
             .filter(|l| !l.is_empty())
-            .map(|l| Packet::from(PacketPart(l.to_string())))
+            .map(|l| l.into())
             .collect();
     }
 
@@ -145,19 +148,24 @@ impl Solver for Solution {
 
     fn solve_part2(&self) -> String {
         let mut packets = self.input.clone();
-        let divider1 = Packet::List(vec![Box::new(Packet::List(vec![Box::new(Packet::Value(
-            2,
-        ))]))]);
-        let divider2 = Packet::List(vec![Box::new(Packet::List(vec![Box::new(Packet::Value(
-            6,
-        ))]))]);
+        let divider1 = Packet::list(&[Packet::list(&[Packet::Value(2)])]);
+        let divider2 = Packet::list(&[Packet::list(&[Packet::Value(6)])]);
         packets.push(divider1.clone());
         packets.push(divider2.clone());
         packets.sort();
 
-        let index1 = packets.binary_search(&divider1).unwrap();
-        // let index2 = packets.binary_search(&divider2).unwrap();
-        format!("{index1}")
+        let mut index1 = 0;
+        let mut index2 = 0;
+        for (i, p) in packets.iter().enumerate() {
+            if p == &divider1 {
+                index1 = i + 1;
+            } else if p == &divider2 {
+                index2 = i + 1;
+            }
+            // println!("{i:0>3} - {p:?}\n\n");
+        }
+
+        (index1 * index2).to_string()
     }
 }
 
@@ -199,8 +207,8 @@ mod test {
         solver.get_input().split("\n\n").for_each(|l| {
             let (left, right) = l.split_once('\n').unwrap();
 
-            let left = Packet::from(PacketPart(left.to_string()));
-            let right = Packet::from(PacketPart(right.to_string()));
+            let left = Packet::from(left);
+            let right = Packet::from(right);
 
             println!("left:  {left:?}\n");
             println!("right: {right:?}");
@@ -228,7 +236,7 @@ mod test {
         let mut solver = Solution::default();
         solver.with_input(get_input());
         let solution = solver.solve_part2();
-        assert_eq!(solution, "");
+        assert_eq!(solution, "140");
     }
 
     #[test]
@@ -244,7 +252,7 @@ mod test {
         let mut solver = Solution::default();
         solver.with_input(solver.get_input());
         let solution = solver.solve_part2();
-        assert_eq!(solution, "");
+        assert_eq!(solution, "19570");
     }
 }
 
