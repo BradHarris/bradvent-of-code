@@ -43,45 +43,7 @@ impl PacketPart {
     }
 }
 
-impl PartialOrd for PacketPart {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        let mut left_iter = self.iter();
-        let mut right_iter = other.iter();
-
-        let mut left = left_iter.next();
-        let mut right = right_iter.next();
-
-        while let Some(l) = &left {
-            if let Some(r) = &right {
-                if l == r {
-                    left = left_iter.next();
-                    right = right_iter.next();
-                    continue;
-                }
-
-                match (l, r) {
-                    (Token::Value(l), Token::Value(r)) => return Some(l.cmp(r)),
-                    (Token::End, _) => return Some(Ordering::Less),
-                    (_, Token::End) => return Some(Ordering::Greater),
-                    (Token::Start, _) => {
-                        left = left_iter.next();
-                        continue;
-                    }
-                    (_, Token::Start) => {
-                        right = right_iter.next();
-                        continue;
-                    }
-                }
-            } else {
-                return Some(Ordering::Greater);
-            }
-        }
-
-        Some(Ordering::Equal)
-    }
-}
-
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, Ord)]
 enum Packet {
     List(Vec<Box<Packet>>),
     Value(u8),
@@ -109,9 +71,47 @@ impl From<PacketPart> for Packet {
     }
 }
 
+impl PartialOrd for Packet {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        let ord = match (self, other) {
+            (Packet::List(left), Packet::List(right)) => {
+                let mut left = left.iter().peekable();
+                let mut right = right.iter().peekable();
+
+                let mut ord = Ordering::Equal;
+                while left.peek().is_some() || right.peek().is_some() {
+                    ord = match (left.next(), right.next()) {
+                        (Some(l), Some(r)) => l.partial_cmp(r).unwrap(),
+                        (Some(_), None) => Ordering::Greater,
+                        (None, Some(_)) => Ordering::Less,
+                        (None, None) => Ordering::Equal,
+                    };
+
+                    if ord != Ordering::Equal {
+                        break;
+                    }
+                }
+
+                ord
+            }
+            (Packet::Value(left), Packet::Value(right)) => left.cmp(right),
+            (Packet::List(_), Packet::Value(right)) => {
+                let list = vec![Box::new(Packet::Value(*right))];
+                self.partial_cmp(&Packet::List(list)).unwrap()
+            }
+            (Packet::Value(left), Packet::List(_)) => {
+                let list = vec![Box::new(Packet::Value(*left))];
+                Packet::List(list).partial_cmp(other).unwrap()
+            }
+        };
+
+        Some(ord)
+    }
+}
+
 #[derive(Default, Debug)]
 pub struct Solution {
-    input: Vec<(PacketPart, PacketPart)>,
+    input: Vec<(Packet, Packet)>,
 }
 
 impl Solver for Solution {
@@ -124,7 +124,10 @@ impl Solver for Solution {
             .split("\n\n")
             .map(|l| {
                 let (left, right) = l.split_once('\n').unwrap();
-                (PacketPart(left.to_string()), PacketPart(right.to_string()))
+                (
+                    Packet::from(PacketPart(left.to_string())),
+                    Packet::from(PacketPart(right.to_string())),
+                )
             })
             .collect();
     }
@@ -184,14 +187,17 @@ mod test {
 
     #[test]
     fn test_thing() {
-        get_input().split("\n\n").for_each(|l| {
+        let solver = Solution::default();
+        // solver.with_input(solver.get_input());
+        solver.get_input().split("\n\n").for_each(|l| {
             let (left, right) = l.split_once('\n').unwrap();
 
             let left = Packet::from(PacketPart(left.to_string()));
             let right = Packet::from(PacketPart(right.to_string()));
 
-            println!("{left:?}");
-            println!("{right:?}\n\n");
+            println!("left:  {left:?}\n");
+            println!("right: {right:?}");
+            println!("{}\n\n", left < right);
         })
     }
 
@@ -221,7 +227,7 @@ mod test {
     #[test]
     fn test_solution_part1() {
         let mut solver = Solution::default();
-        solver.with_input(INPUT);
+        solver.with_input(solver.get_input());
         let solution = solver.solve_part1();
         assert_eq!(solution, "");
     }
@@ -229,7 +235,7 @@ mod test {
     #[test]
     fn test_solution_part2() {
         let mut solver = Solution::default();
-        solver.with_input(INPUT);
+        solver.with_input(solver.get_input());
         let solution = solver.solve_part2();
         assert_eq!(solution, "");
     }
