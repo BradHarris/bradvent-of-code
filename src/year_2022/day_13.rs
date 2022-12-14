@@ -43,7 +43,7 @@ impl PacketPart {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Ord)]
+#[derive(Debug, PartialEq, Eq, Ord, Clone)]
 enum Packet {
     List(Vec<Box<Packet>>),
     Value(u8),
@@ -111,7 +111,7 @@ impl PartialOrd for Packet {
 
 #[derive(Default, Debug)]
 pub struct Solution {
-    input: Vec<(Packet, Packet)>,
+    input: Vec<Packet>,
 }
 
 impl Solver for Solution {
@@ -121,36 +121,43 @@ impl Solver for Solution {
 
     fn with_input(&mut self, input: &str) {
         self.input = input
-            .split("\n\n")
-            .map(|l| {
-                let (left, right) = l.split_once('\n').unwrap();
-                (
-                    Packet::from(PacketPart(left.to_string())),
-                    Packet::from(PacketPart(right.to_string())),
-                )
-            })
+            .lines()
+            .filter(|l| !l.is_empty())
+            .map(|l| Packet::from(PacketPart(l.to_string())))
             .collect();
     }
 
     fn solve_part1(&self) -> String {
         self.input
-            .iter()
+            .chunks(2)
             .enumerate()
-            .fold(
-                0,
-                |acc, (i, (left, right))| {
-                    if left < right {
-                        acc + i + 1
-                    } else {
-                        acc
-                    }
-                },
-            )
+            .fold(0, |acc, (i, pair)| {
+                let left = pair.get(0).unwrap();
+                let right = pair.get(1).unwrap();
+                if left < right {
+                    acc + i + 1
+                } else {
+                    acc
+                }
+            })
             .to_string()
     }
 
     fn solve_part2(&self) -> String {
-        "".to_string()
+        let mut packets = self.input.clone();
+        let divider1 = Packet::List(vec![Box::new(Packet::List(vec![Box::new(Packet::Value(
+            2,
+        ))]))]);
+        let divider2 = Packet::List(vec![Box::new(Packet::List(vec![Box::new(Packet::Value(
+            6,
+        ))]))]);
+        packets.push(divider1.clone());
+        packets.push(divider2.clone());
+        packets.sort();
+
+        let index1 = packets.binary_search(&divider1).unwrap();
+        // let index2 = packets.binary_search(&divider2).unwrap();
+        format!("{index1}")
     }
 }
 
@@ -205,7 +212,7 @@ mod test {
     fn test_parse() {
         let mut solver = Solution::default();
         solver.with_input(get_input());
-        println!("{:#?}", solver);
+        println!("{solver:#?}");
     }
 
     #[test]
@@ -229,7 +236,7 @@ mod test {
         let mut solver = Solution::default();
         solver.with_input(solver.get_input());
         let solution = solver.solve_part1();
-        assert_eq!(solution, "");
+        assert_eq!(solution, "5350");
     }
 
     #[test]
