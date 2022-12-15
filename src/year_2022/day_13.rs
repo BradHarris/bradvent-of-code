@@ -1,5 +1,5 @@
 use crate::solver::Solver;
-use std::{cmp::Ordering, ops::Index, vec::Drain};
+use std::{cmp::Ordering, vec::Drain};
 
 #[derive(PartialEq, Eq)]
 enum Token {
@@ -8,21 +8,21 @@ enum Token {
     Value(u8),
 }
 
-struct PacketPartIter {
+struct PacketTokensIter {
     packet: Vec<char>,
     pos: usize,
 }
 
-impl From<&str> for PacketPartIter {
+impl From<&str> for PacketTokensIter {
     fn from(s: &str) -> Self {
-        PacketPartIter {
+        PacketTokensIter {
             packet: s.replace("10", "a").chars().collect(),
             pos: 0,
         }
     }
 }
 
-impl Iterator for PacketPartIter {
+impl Iterator for PacketTokensIter {
     type Item = Token;
     fn next(&mut self) -> Option<Self::Item> {
         let next = self.packet.get(self.pos)?;
@@ -33,24 +33,24 @@ impl Iterator for PacketPartIter {
             ']' => Some(Token::End),
             _ => {
                 let amt = next.to_digit(11)? as u8;
-                return Some(Token::Value(amt));
+                Some(Token::Value(amt))
             }
         }
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Ord, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 enum Packet {
-    List(Vec<Box<Packet>>),
+    List(Vec<Packet>),
     Value(u8),
 }
 
 fn create_packet(tokens: &mut Drain<Token>) -> Packet {
-    let mut packets: Vec<Box<Packet>> = Vec::new();
+    let mut packets: Vec<Packet> = Vec::new();
     while let Some(next) = tokens.next() {
         match next {
-            Token::Start => packets.push(Box::new(create_packet(tokens))),
-            Token::Value(amt) => packets.push(Box::new(Packet::Value(amt))),
+            Token::Start => packets.push(create_packet(tokens)),
+            Token::Value(amt) => packets.push(Packet::Value(amt)),
             Token::End => return Packet::List(packets),
         };
     }
@@ -60,7 +60,7 @@ fn create_packet(tokens: &mut Drain<Token>) -> Packet {
 
 impl From<&str> for Packet {
     fn from(s: &str) -> Self {
-        let p: PacketPartIter = s.into();
+        let p: PacketTokensIter = s.into();
         let mut tokens = p.collect::<Vec<Token>>();
         let mut tokens = tokens.drain(0..);
         tokens.next();
@@ -93,11 +93,11 @@ impl PartialOrd for Packet {
             }
             (Packet::Value(left), Packet::Value(right)) => left.cmp(right),
             (Packet::List(_), Packet::Value(right)) => {
-                let list = vec![Box::new(Packet::Value(*right))];
+                let list = vec![Packet::Value(*right)];
                 self.partial_cmp(&Packet::List(list)).unwrap()
             }
             (Packet::Value(left), Packet::List(_)) => {
-                let list = vec![Box::new(Packet::Value(*left))];
+                let list = vec![Packet::Value(*left)];
                 Packet::List(list).partial_cmp(other).unwrap()
             }
         };
@@ -106,9 +106,9 @@ impl PartialOrd for Packet {
     }
 }
 
-impl Packet {
-    fn list(packets: &[Packet]) -> Packet {
-        Packet::List(packets.iter().map(|p| Box::new(p.to_owned())).collect())
+impl Ord for Packet {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.partial_cmp(other).unwrap()
     }
 }
 
@@ -148,24 +148,18 @@ impl Solver for Solution {
 
     fn solve_part2(&self) -> String {
         let mut packets = self.input.clone();
-        let divider1 = Packet::list(&[Packet::list(&[Packet::Value(2)])]);
-        let divider2 = Packet::list(&[Packet::list(&[Packet::Value(6)])]);
+        let divider1 = Packet::List(vec![Packet::List(vec![Packet::Value(2)])]);
+        let divider2 = Packet::List(vec![Packet::List(vec![Packet::Value(6)])]);
         packets.push(divider1.clone());
         packets.push(divider2.clone());
         packets.sort();
 
-        let mut index1 = 0;
-        let mut index2 = 0;
-        for (i, p) in packets.iter().enumerate() {
-            if p == &divider1 {
-                index1 = i + 1;
-            } else if p == &divider2 {
-                index2 = i + 1;
-            }
-            // println!("{i:0>3} - {p:?}\n\n");
-        }
-
-        (index1 * index2).to_string()
+        packets
+            .iter()
+            .enumerate()
+            .filter(|p| p.1 == &divider1 || p.1 == &divider2)
+            .fold(1, |acc, (i, _)| acc * (i + 1))
+            .to_string()
     }
 }
 
@@ -201,26 +195,10 @@ mod test {
     }
 
     #[test]
-    fn test_thing() {
-        let solver = Solution::default();
-        // solver.with_input(solver.get_input());
-        solver.get_input().split("\n\n").for_each(|l| {
-            let (left, right) = l.split_once('\n').unwrap();
-
-            let left = Packet::from(left);
-            let right = Packet::from(right);
-
-            println!("left:  {left:?}\n");
-            println!("right: {right:?}");
-            println!("{}\n\n", left < right);
-        })
-    }
-
-    #[test]
     fn test_parse() {
         let mut solver = Solution::default();
         solver.with_input(get_input());
-        println!("{solver:#?}");
+        println!("{solver:?}");
     }
 
     #[test]

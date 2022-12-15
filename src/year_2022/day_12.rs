@@ -171,9 +171,21 @@ impl Solver for Solution {
     }
 
     fn solve_part2(&self) -> String {
+        let mut solves: HashMap<Position, usize> = HashMap::new();
+
         self.alt_starts
             .iter()
-            .map(|start| self.grid.astar(*start, self.end).len())
+            .map(|start| {
+                if solves.contains_key(start) {
+                    return *solves.get(start).unwrap();
+                }
+                let path = self.grid.astar(*start, self.end);
+                let len = path.len();
+                path.iter().enumerate().for_each(|(i, p)| {
+                    solves.insert(*p, len - i);
+                });
+                len
+            })
             .filter(|l| *l > 0)
             .min()
             .unwrap()
@@ -215,7 +227,7 @@ abdefghi"
     }
 
     #[test]
-    fn test_solution_part1() {
+    fn test_solution_example1() {
         let mut solver = Solution::default();
         solver.with_input(get_input());
         let solution = solver.solve_part1();
@@ -223,15 +235,32 @@ abdefghi"
     }
 
     #[test]
-    fn test_solution_part2() {
+    fn test_solution_example2() {
         let mut solver = Solution::default();
         solver.with_input(get_input());
         let solution = solver.solve_part2();
-        assert_eq!(solution, "");
+        assert_eq!(solution, "29");
+    }
+
+    #[test]
+    fn test_solution_part1() {
+        let mut solver = Solution::default();
+        solver.with_input(solver.get_input());
+        let solution = solver.solve_part1();
+        assert_eq!(solution, "534");
+    }
+
+    #[test]
+    fn test_solution_part2() {
+        let mut solver = Solution::default();
+        solver.with_input(solver.get_input());
+        let solution = solver.solve_part2();
+        assert_eq!(solution, "525");
     }
 }
 
-const INPUT: &str = "abccccaaaaaaaaaaaaaccaaaaaaaacccccccccaaaaaaaaccccccccaaacaaacccccccaaaaaaccccccccccccccccccccccaaaacccccccccccacccccccccccccccccccccccccccccccccccccccccccccccaaaa
+const INPUT: &str = "\
+abccccaaaaaaaaaaaaaccaaaaaaaacccccccccaaaaaaaaccccccccaaacaaacccccccaaaaaaccccccccccccccccccccccaaaacccccccccccacccccccccccccccccccccccccccccccccccccccccccccccaaaa
 abccccaaaaacaaaaaaccccaaaaaaccccccccccaaaaaaacccccccccaaaaaaacccccaaaaaaaaaacccccccccccccccccccaaaaaacccccccccaaaaaaaaccccccccccccccccccccccccccccccccccccccccaaaaa
 abcccaaaaaccaaaaaaccccaaaaaaccccccaacccaaaaaacccccccccaaaaaacccaaaaaaaaaaaaaaacaaccacccccccccccaaaaaaccccccccccaaaaaacccccccccccccccccccccccccccccccccccccccccaaaaa
 abccccccaaccaaaaaaccaaaaaaaaccccccaaacaaaacaaacccccccaaaaaaaaccaaaaaaaaaaaaaaacaaaaacccccccccccccaaccccccccccccaaaaaaccccccccccccccccccccccccccccacccccccccccaaaaaa
