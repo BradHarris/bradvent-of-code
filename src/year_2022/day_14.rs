@@ -78,7 +78,7 @@ impl Solver for Solution {
                         self.rock.insert(Point(x, y1));
                     }
                 } else {
-                    println!("FUCK")
+                    println!("WARN: some lines are not purely vertical or horizontal")
                 }
             })
         });
@@ -113,14 +113,14 @@ impl Solver for Solution {
             }
         }
 
-        println!("{sand_count}");
         sand_count.to_string()
     }
 
     fn solve_part2(&self) -> String {
         let mut standing_on_top = false;
         let mut sand_count = 0;
-        self.draw_rocks();
+        // self.clear_terminal();
+        // self.draw_rocks();
         let mut sands: HashSet<Point> = HashSet::new();
         let dirs = [Point(0, 1), Point(-1, 1), Point(1, 1)];
         while !standing_on_top {
@@ -132,7 +132,7 @@ impl Solver for Solution {
                     for dir in dirs {
                         let target = sand + dir;
                         if !self.rock.contains(&target) && !sands.contains(&target) {
-                            self.animate(&target, &sand);
+                            // self.animate(&target, &sand);
                             sand = target;
                             is_done = false;
                             break;
@@ -148,33 +148,20 @@ impl Solver for Solution {
                     }
                 }
             }
+
+            if sand_count % 100 == 0 {
+                thread::sleep(Duration::from_millis(50));
+                self.clear_terminal();
+                self.draw_sand(&sands);
+                self.draw_rocks();
+            }
         }
 
-        println!("{sand_count}");
+        // self.clear_terminal();
+        // self.draw_sand(&sands);
+        // self.draw_rocks();
+
         sand_count.to_string()
-    }
-}
-
-impl Solution {
-    fn draw_rocks(&self) {
-        print!("{esc}c", esc = 27 as char);
-        self.rock.iter().for_each(|Point(x, y)| {
-            print!("\x1b[{};{}H", *y, *x);
-            print!("x");
-        });
-
-        for x in 0..1000 {
-            print!("\x1b[{};{}H", self.max_y + 2, x);
-            print!("x");
-        }
-    }
-
-    fn animate(&self, sand: &Point, prev: &Point) {
-        thread::sleep(Duration::from_millis(16));
-        print!("\x1b[{};{}H", sand.1, sand.0);
-        print!("o");
-        print!("\x1b[{};{}H", prev.1, prev.0);
-        print!(" ");
     }
 }
 
@@ -233,6 +220,41 @@ mod test {
         solver.with_input(solver.get_input());
         let solution = solver.solve_part2();
         assert_eq!(solution, "");
+    }
+}
+
+const X_OFFSET: i16 = -300;
+const Y_OFFSET: i16 = 2;
+impl Solution {
+    fn clear_terminal(&self) {
+        print!("{esc}c", esc = 27 as char);
+        print!("{:\n>250}", "");
+    }
+
+    fn draw_sand(&self, sand: &HashSet<Point>) {
+        sand.iter().for_each(|Point(x, y)| {
+            print!("\x1b[{};{}H", *y + Y_OFFSET, *x + X_OFFSET);
+            print!("o");
+        });
+    }
+    fn draw_rocks(&self) {
+        self.rock.iter().for_each(|Point(x, y)| {
+            print!("\x1b[{};{}H", *y + Y_OFFSET, *x + X_OFFSET);
+            print!("x");
+        });
+
+        for x in 0..500 {
+            print!("\x1b[{};{}H", self.max_y + Y_OFFSET + 2, x);
+            print!("x");
+        }
+    }
+
+    fn animate(&self, sand: &Point, prev: &Point) {
+        thread::sleep(Duration::from_millis(16));
+        print!("\x1b[{};{}H", sand.1 + Y_OFFSET, sand.0 + X_OFFSET);
+        print!("o");
+        print!("\x1b[{};{}H", prev.1 + Y_OFFSET, prev.0 + X_OFFSET);
+        print!(" ");
     }
 }
 
