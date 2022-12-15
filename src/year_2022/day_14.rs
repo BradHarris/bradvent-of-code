@@ -1,9 +1,16 @@
-use std::{collections::HashSet, str::FromStr, thread, time::Duration, usize::MAX};
+use std::{
+    collections::HashSet,
+    i16::MAX,
+    ops::{Add, AddAssign},
+    str::FromStr,
+    thread,
+    time::Duration,
+};
 
 use crate::solver::Solver;
 
-#[derive(Debug, PartialOrd, Ord, PartialEq, Eq, Hash)]
-struct Point(usize, usize);
+#[derive(Debug, PartialOrd, Ord, PartialEq, Eq, Hash, Clone, Copy)]
+struct Point(i16, i16);
 
 impl FromStr for Point {
     type Err = String;
@@ -13,14 +20,30 @@ impl FromStr for Point {
     }
 }
 
+impl Add for Point {
+    type Output = Self;
+    fn add(self, rhs: Self) -> Self::Output {
+        Point(self.0 + rhs.0, self.1 + rhs.1)
+    }
+}
+
+impl AddAssign for Point {
+    fn add_assign(&mut self, rhs: Self) {
+        self.0 += rhs.0;
+        self.1 += rhs.1;
+    }
+}
+
 #[derive(Debug)]
 struct Line(Vec<Point>);
 
 #[derive(Default, Debug)]
 pub struct Solution {
-    input: HashSet<Point>,
-    min_x: usize,
-    min_y: usize,
+    rock: HashSet<Point>,
+    min_x: i16,
+    min_y: i16,
+    max_x: i16,
+    max_y: i16,
 }
 
 impl Solver for Solution {
@@ -38,46 +61,120 @@ impl Solver for Solution {
                 .inspect(|Point(x, y)| {
                     self.min_x = self.min_x.min(*x);
                     self.min_y = self.min_y.min(*y);
+                    self.max_y = self.max_y.max(*y);
+                    self.max_x = self.max_x.max(*x);
                 })
                 .collect();
             lines.windows(2).for_each(|p| {
                 let Point(x1, y1) = p[0];
                 let Point(x2, y2) = p[1];
-                let dx = x2 - x1;
-                let dy = y2 - y1;
 
-                for x in x1..x2 {
-                    let y = y1 + dy * (x - x1) / dx;
-                    self.input.insert(Point(x, y));
+                if x1 == x2 {
+                    for y in y1.min(y2)..=y1.max(y2) {
+                        self.rock.insert(Point(x1, y));
+                    }
+                } else if y1 == y2 {
+                    for x in x1.min(x2)..=x1.max(x2) {
+                        self.rock.insert(Point(x, y1));
+                    }
+                } else {
+                    println!("FUCK")
                 }
             })
         });
-
-        // print!("{esc}c", esc = 27 as char);
-
-        // self.input.iter().for_each(|l| {
-        //     l.0.iter().for_each(|Point(x, y)| {
-        //         print!("\x1b[{};{}H", x - self.min_x, y - self.min_y);
-        //         print!("x");
-        //     })
-        // })
     }
 
     fn solve_part1(&self) -> String {
-        // self.input.iter().for
-        "".to_string()
+        let mut in_the_abyss = false;
+        let mut sand_count = 0;
+
+        let mut sands: HashSet<Point> = HashSet::new();
+        let dirs = [Point(0, 1), Point(-1, 1), Point(1, 1)];
+        while !in_the_abyss {
+            let mut sand = Point(500, 0);
+            let mut is_done = false;
+            while !is_done {
+                is_done = true;
+                for dir in dirs {
+                    let target = sand + dir;
+                    if !self.rock.contains(&target) && !sands.contains(&target) {
+                        sand = target;
+                        is_done = false;
+                        break;
+                    }
+                }
+                if is_done {
+                    sand_count += 1;
+                    sands.insert(sand);
+                } else if sand.1 > self.max_y {
+                    in_the_abyss = true;
+                    break;
+                }
+            }
+        }
+
+        println!("{sand_count}");
+        sand_count.to_string()
     }
 
     fn solve_part2(&self) -> String {
-        "".to_string()
+        let mut standing_on_top = false;
+        let mut sand_count = 0;
+        self.draw_rocks();
+        let mut sands: HashSet<Point> = HashSet::new();
+        let dirs = [Point(0, 1), Point(-1, 1), Point(1, 1)];
+        while !standing_on_top {
+            let mut sand = Point(500, 0);
+            let mut is_done = false;
+            while !is_done {
+                is_done = true;
+                if sand.1 != self.max_y + 1 {
+                    for dir in dirs {
+                        let target = sand + dir;
+                        if !self.rock.contains(&target) && !sands.contains(&target) {
+                            self.animate(&target, &sand);
+                            sand = target;
+                            is_done = false;
+                            break;
+                        }
+                    }
+                }
+                if is_done {
+                    sand_count += 1;
+                    sands.insert(sand);
+                    if sand.1 == 0 {
+                        standing_on_top = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        println!("{sand_count}");
+        sand_count.to_string()
     }
 }
 
 impl Solution {
-    fn animate(&self) {
+    fn draw_rocks(&self) {
+        print!("{esc}c", esc = 27 as char);
+        self.rock.iter().for_each(|Point(x, y)| {
+            print!("\x1b[{};{}H", *y, *x);
+            print!("x");
+        });
+
+        for x in 0..1000 {
+            print!("\x1b[{};{}H", self.max_y + 2, x);
+            print!("x");
+        }
+    }
+
+    fn animate(&self, sand: &Point, prev: &Point) {
         thread::sleep(Duration::from_millis(16));
-        print!("{}[2J", 27 as char);
-        print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
+        print!("\x1b[{};{}H", sand.1, sand.0);
+        print!("o");
+        print!("\x1b[{};{}H", prev.1, prev.0);
+        print!(" ");
     }
 }
 
@@ -86,7 +183,8 @@ mod test {
     use super::*;
 
     fn get_example_input<'a>() -> &'a str {
-        "498,4 -> 498,6 -> 496,6
+        "\
+498,4 -> 498,6 -> 496,6
 503,4 -> 502,4 -> 502,9 -> 494,9"
     }
 
@@ -94,7 +192,8 @@ mod test {
     fn test_parse_example() {
         let mut solver = Solution::default();
         solver.with_input(get_example_input());
-        println!("{:#?}", solver);
+        // solver.animate(&HashSet::new(), &Point(500, 0));
+        // println!("{:#?}", solver);
     }
 
     #[test]
@@ -102,7 +201,7 @@ mod test {
         let mut solver = Solution::default();
         solver.with_input(get_example_input());
         let solution = solver.solve_part1();
-        assert_eq!(solution, "");
+        assert_eq!(solution, "24");
     }
 
     #[test]
@@ -110,14 +209,14 @@ mod test {
         let mut solver = Solution::default();
         solver.with_input(get_example_input());
         let solution = solver.solve_part2();
-        assert_eq!(solution, "");
+        assert_eq!(solution, "93");
     }
 
     #[test]
     fn test_parse() {
         let mut solver = Solution::default();
         solver.with_input(solver.get_input());
-        println!("{:#?}", solver);
+        // println!("{:#?}", solver);
     }
 
     #[test]
