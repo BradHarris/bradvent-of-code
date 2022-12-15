@@ -45,7 +45,7 @@ fn create_dir(input: &mut Drain<&str>, dir: &mut Directory) -> usize {
 impl From<&str> for Directory {
     fn from(input: &str) -> Self {
         let mut dir = Directory::default();
-        let mut lines = input.split('\n').collect::<Vec<&str>>();
+        let mut lines = input.lines().collect::<Vec<&str>>();
         let mut input = lines.drain(0..);
 
         create_dir(&mut input, &mut dir);

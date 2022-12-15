@@ -149,12 +149,12 @@ impl Solver for Solution {
                 }
             }
 
-            if sand_count % 100 == 0 {
-                thread::sleep(Duration::from_millis(50));
-                self.clear_terminal();
-                self.draw_sand(&sands);
-                self.draw_rocks();
-            }
+            // if sand_count % 100 == 0 {
+            //     thread::sleep(Duration::from_millis(50));
+            //     self.clear_terminal();
+            //     self.draw_sand(&sands);
+            //     self.draw_rocks();
+            // }
         }
 
         // self.clear_terminal();

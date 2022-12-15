@@ -44,7 +44,7 @@ impl Solver for Solution {
             .chars()
             .zip(1..53)
             .collect();
-        self.input = input.split('\n').map(|l| l.to_owned()).collect();
+        self.input = input.lines().map(|l| l.to_owned()).collect();
     }
 
     fn solve_part1(&self) -> String {

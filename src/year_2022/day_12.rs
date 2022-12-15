@@ -135,7 +135,7 @@ impl Solver for Solution {
     fn with_input(&mut self, input: &str) {
         self.grid = Grid(
             input
-                .split('\n')
+                .lines()
                 .enumerate()
                 .map(|(y, l)| {
                     l.chars()

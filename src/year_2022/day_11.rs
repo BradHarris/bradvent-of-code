@@ -61,7 +61,7 @@ struct Monkey {
 impl FromStr for Monkey {
     type Err = String;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let lines = s.trim().split('\n').collect::<Vec<&str>>();
+        let lines = s.trim().lines().collect::<Vec<&str>>();
 
         let index = lines[0]
             .trim()

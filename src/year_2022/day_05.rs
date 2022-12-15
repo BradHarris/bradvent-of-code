@@ -12,7 +12,7 @@ impl Solver for Solution {
     }
 
     fn with_input(&mut self, input: &str) {
-        for line in input.split('\n') {
+        for line in input.lines() {
             if line.is_empty() {
                 break;
             }
@@ -33,7 +33,7 @@ impl Solver for Solution {
                 });
         }
 
-        for line in input.split('\n') {
+        for line in input.lines() {
             if !line.starts_with("move") {
                 continue;
             }

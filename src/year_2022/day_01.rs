@@ -13,7 +13,7 @@ impl Solver for Solution {
     fn with_input(&mut self, input: &str) {
         let mut calorie_counts =
             input
-                .split('\n')
+                .lines()
                 .map(|l| l.parse::<u32>().ok())
                 .fold(vec![0], |mut acc, n| {
                     if let Some(n) = n {

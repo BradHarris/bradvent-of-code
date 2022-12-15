@@ -19,7 +19,7 @@ impl Solver for Solution {
     }
 
     fn with_input(&mut self, input: &str) {
-        input.split('\n').enumerate().for_each(|(y, row)| {
+        input.lines().enumerate().for_each(|(y, row)| {
             self.height += 1;
             self.width = row.trim().len();
 

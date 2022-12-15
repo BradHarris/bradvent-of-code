@@ -34,7 +34,7 @@ impl Solver for Solution {
     }
 
     fn with_input(&mut self, input: &str) {
-        self.input = input.split('\n').map(|l| l.parse().unwrap()).collect();
+        self.input = input.lines().map(|l| l.parse().unwrap()).collect();
     }
 
     fn solve_part1(&self) -> String {

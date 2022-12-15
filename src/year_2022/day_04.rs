@@ -41,7 +41,7 @@ impl Solver for Solution {
 
     fn with_input(&mut self, input: &str) {
         self.input = input
-            .split('\n')
+            .lines()
             .map(|l| {
                 let (first, second) = l.split_once(',').unwrap();
                 (

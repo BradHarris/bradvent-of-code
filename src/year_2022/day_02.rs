@@ -93,7 +93,7 @@ impl Solver for Solution {
 
     fn with_input(&mut self, input: &str) {
         self.input = input
-            .split('\n')
+            .lines()
             .map(|l| {
                 let (left, right) = l.split_once(' ').unwrap();
                 (left.to_owned(), right.to_owned())

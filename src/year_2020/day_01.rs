@@ -13,7 +13,7 @@ impl Solver for Solution {
     }
 
     fn with_input(&mut self, input: &str) {
-        self.input = input.split('\n').map(|l| l.parse().unwrap()).collect()
+        self.input = input.lines().map(|l| l.parse().unwrap()).collect()
     }
 
     fn solve_part1(&self) -> String {
@@ -31,10 +31,13 @@ impl Solver for Solution {
             .input
             .iter()
             .find_map(|x1| {
-                self.input.iter().find(|x2| {
-                    self.input
-                        .contains(&(target - x1.to_owned() - x2.to_owned()))
-                }).map(|v| (x1, v))
+                self.input
+                    .iter()
+                    .find(|x2| {
+                        self.input
+                            .contains(&(target - x1.to_owned() - x2.to_owned()))
+                    })
+                    .map(|v| (x1, v))
             })
             .unwrap();
         (v1 * v2 * (target - v1 - v2)).to_string()

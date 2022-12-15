@@ -58,16 +58,29 @@ impl Solvers {
 
         let solver = self.solvers.get_mut(day).unwrap();
 
+        #[cfg(debug_assertions)]
+        let run_count = 1;
+        #[cfg(not(debug_assertions))]
+        let run_count = 10;
+
+        println!("averaged over {run_count} runs");
         let part1_start = Instant::now();
-        solver.with_input(solver.get_input());
-        println!("part 1: {}", solver.solve_part1());
-        let part1_dur = part1_start.elapsed();
+        let mut solution1 = "".into();
+        for _ in 0..run_count {
+            solver.with_input(solver.get_input());
+            solution1 = solver.solve_part1();
+        }
+        let part1_dur = part1_start.elapsed() / run_count;
 
         let part2_start = Instant::now();
-        solver.with_input(solver.get_input());
-        println!("part 2: {}", solver.solve_part2());
-        let part2_dur = part2_start.elapsed();
+        let mut solution2 = "".into();
+        for _ in 0..run_count {
+            solver.with_input(solver.get_input());
+            solution2 = solver.solve_part2();
+        }
+        let part2_dur = part2_start.elapsed() / run_count;
 
-        println!("part1: {part1_dur:?}\npart2: {part2_dur:?}\n");
+        println!("part 1 ({part1_dur:?}): {solution1}");
+        println!("part 2 ({part2_dur:?}): {solution2}");
     }
 }

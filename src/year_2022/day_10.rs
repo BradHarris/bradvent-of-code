@@ -42,7 +42,7 @@ impl Solver for Solution {
 
     fn with_input(&mut self, input: &str) {
         self.input = input
-            .split('\n')
+            .lines()
             .map(|l| l.parse().unwrap())
             .flat_map(|c| match c {
                 Command::Noop => vec![None],
