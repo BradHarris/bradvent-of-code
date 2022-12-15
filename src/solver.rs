@@ -31,7 +31,7 @@ impl Solvers {
                 Box::new(day_12::Solution::default()),
                 Box::new(day_13::Solution::default()),
                 Box::new(day_14::Solution::default()),
-                // Box::new(day_15::Solution::default()),
+                Box::new(day_15::Solution::default()),
                 // Box::new(day_16::Solution::default()),
                 // Box::new(day_17::Solution::default()),
                 // Box::new(day_18::Solution::default()),
