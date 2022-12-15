@@ -1,5 +1,4 @@
 #!/bin/bash
 
-touch ./src/year_2022/day_$1.txt
-
-cp ./src/day_template.rs ./src/year_2022/day_$1.rs
+cp ./src/day_template.rs ./src/year_$1/day_$2.rs
+echo "pub mod day_$2;" >> ./src/year_$1.rs
