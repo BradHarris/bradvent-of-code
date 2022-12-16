@@ -1,11 +1,11 @@
-use std::{collections::HashMap, str::FromStr};
+use std::{cell::RefCell, collections::HashMap, str::FromStr};
 
 use crate::solver::Solver;
 
 #[derive(Default, Debug, Clone)]
 struct Valve {
     key: String,
-    is_open: bool,
+    is_open: RefCell<bool>,
     flow_rate: usize,
     neighbors: Vec<String>,
 }
@@ -17,10 +17,12 @@ impl FromStr for Valve {
             .trim_start_matches("Valve ")
             .split_once(" has flow rate=")
             .unwrap();
-        let (flow_rate, neighbors) = rest.split_once("; tunnels lead to valves ").unwrap();
+        let (flow_rate, neighbors) = rest.split_once(";").unwrap();
+        let neighbors = neighbors
+            .trim_start_matches(|c: char| c.is_ascii_lowercase() || c.is_ascii_whitespace());
         Ok(Self {
             key: key.to_string(),
-            is_open: false,
+            is_open: RefCell::new(false),
             flow_rate: flow_rate.parse().unwrap(),
             neighbors: neighbors.split(", ").map(|l| l.to_string()).collect(),
         })
@@ -28,32 +30,54 @@ impl FromStr for Valve {
 }
 
 #[derive(Default, Debug, Clone)]
-struct ValveNetwork {
-    start: String,
-    valve_map: HashMap<String, Valve>,
+struct ValveNetwork(HashMap<String, Valve>);
+
+impl ValveNetwork {
+    fn iter(&self, start: String) -> ValveNetworkIter {
+        ValveNetworkIter::new(&self, start)
+    }
 }
 
-// struct ValveNetworkIter<'a> {
-//     network: &'a ValveNetwork,
-//     cur_valve: String,
-// }
+struct ValveNetworkIter<'a> {
+    network: &'a ValveNetwork,
+    visited: HashMap<String, usize>,
+    to_visit: Vec<(usize, String)>,
+}
 
-// impl<'a> ValveNetworkIter<'a> {
-//     fn new(network: &'a ValveNetwork, start: String) -> Self {
-//         Self {
-//             network,
-//             cur_valve: start,
-//         }
-//     }
-// }
+impl<'a> ValveNetworkIter<'a> {
+    fn new(network: &'a ValveNetwork, start: String) -> Self {
+        Self {
+            network,
+            visited: HashMap::new(),
+            to_visit: vec![(1, start)],
+        }
+    }
+}
 
-// impl<'a> Iterator for ValveNetworkIter<'a> {
-//     type Item = &'a Valve;
+impl<'a> Iterator for ValveNetworkIter<'a> {
+    type Item = (usize, &'a Valve);
 
-//     fn next(&mut self) -> Option<Self::Item> {
-//         let neighbors = self.network.
-//     }
-// }
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.to_visit.len() == 0 {
+            return None;
+        }
+
+        let next = self.to_visit.drain(0..1).next()?;
+
+        let valve = self.network.0.get(&next.1).unwrap();
+        self.visited.insert(next.1, next.0);
+
+        self.to_visit.extend(
+            valve
+                .neighbors
+                .iter()
+                .filter(|v| !self.visited.contains_key(*v))
+                .map(|n| (next.0 + 1, n.clone())),
+        );
+
+        Some((next.0, valve))
+    }
+}
 
 #[derive(Default, Debug)]
 pub struct Solution {
@@ -66,31 +90,79 @@ impl Solver for Solution {
     }
 
     fn with_input(&mut self, input: &str) {
-        self.input = ValveNetwork {
-            start: "AA".to_string(),
-            valve_map: input
+        self.input = ValveNetwork(
+            input
                 .lines()
                 .map(|l| {
                     let valve = l.parse::<Valve>().unwrap();
                     (valve.key.clone(), valve)
                 })
                 .collect(),
-        };
+        );
     }
 
     fn solve_part1(&self) -> String {
-        let mut current = self.input.start.clone();
-        let mut network = self.input.valve_map.clone();
-        let minutes = 30;
+        let network = self.input.clone();
+        let mut minutes = 30;
+        let mut flowed = 0;
+        let mut flow_rate = 0;
+        let mut current_key = "AA".to_string();
 
         while minutes > 0 {
-            let next = network.get_mut(&current).unwrap();
-            if !next.is_open && next.flow_rate > 0 {
-                next.is_open = true;
+            println!("\n");
+            let mut next = network
+                .iter(current_key.clone())
+                .filter(|(mins, v)| *mins < minutes && !*v.is_open.borrow())
+                .collect::<Vec<(usize, &Valve)>>();
+            next.sort_by_key(|(mins, v)| {
+                (minutes as isize - (*mins as isize)) * v.flow_rate as isize
+            });
+            next.reverse();
+
+            next.iter().for_each(|(mins, v)| {
+                println!(
+                    "{mins} {} {v:?}",
+                    (minutes as isize - (*mins as isize)) * v.flow_rate as isize
+                );
+            });
+            println!("\n");
+
+            if let Some((mins, next_valve)) = network
+                .iter(current_key)
+                .filter(|(mins, v)| *mins < minutes && !*v.is_open.borrow())
+                .max_by_key(|(mins, v)| {
+                    (minutes as isize - (*mins as isize)) * v.flow_rate as isize
+                })
+            {
+                minutes -= mins;
+                println!("{minutes} {mins} {next_valve:?}");
+                flowed += flow_rate * mins;
+                flow_rate += next_valve.flow_rate;
+                *next_valve.is_open.borrow_mut() = true;
+                current_key = next_valve.key.clone();
+            } else {
+                break;
             }
         }
 
-        "".to_string()
+        /*
+        DD
+        BB
+        JJ
+        HH
+        EE
+        CC
+        */
+        // .for_each(|(i, f)| println!("{i} -> {f:?}"));
+
+        // while minutes > 0 {
+        //     let next = network.get(&current).unwrap();
+        //     if !next.is_open && next.flow_rate > 0 {
+        //         next.is_open = true;
+        //     }
+        // }
+
+        flowed.to_string()
     }
 
     fn solve_part2(&self) -> String {
@@ -128,7 +200,7 @@ Valve JJ has flow rate=21; tunnel leads to valve II"
         let mut solver = Solution::default();
         solver.with_input(get_example_input());
         let solution = solver.solve_part1();
-        assert_eq!(solution, "");
+        assert_eq!(solution, "1651");
     }
 
     #[test]
