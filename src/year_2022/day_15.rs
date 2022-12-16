@@ -1,6 +1,6 @@
 use std::{
     collections::HashSet,
-    ops::{Range, RangeBounds, RangeInclusive},
+    ops::{AddAssign, Range, RangeBounds, RangeInclusive},
     str::FromStr,
 };
 
@@ -65,6 +65,37 @@ pub struct Solution {
     part2_max: isize,
 }
 
+impl Solution {
+    fn get_ranges(&self, y: isize) -> Vec<(isize, isize)> {
+        self.get_ranges_between(y, isize::MIN, isize::MAX)
+    }
+
+    fn get_ranges_between(&self, y: isize, min_x: isize, max_x: isize) -> Vec<(isize, isize)> {
+        let mut ranges = self
+            .sensors
+            .iter()
+            .filter(|s| (s.min_y..=s.max_y).contains(&y))
+            .map(|s| {
+                let offset = (y - s.pos.1).abs();
+                (min_x.max(s.min_x + offset), max_x.min(s.max_x - offset))
+            })
+            .collect::<Vec<(isize, isize)>>();
+
+        ranges.sort_by_key(|r| r.0);
+        let first = ranges.first().unwrap().clone();
+        let merged_ranges = ranges.iter().skip(1).fold(vec![first], |mut acc, r| {
+            let last = acc.last_mut().unwrap();
+            if r.0 <= last.1 {
+                last.1 = last.1.max(r.1);
+            } else {
+                acc.push(*r);
+            }
+            acc
+        });
+        merged_ranges
+    }
+}
+
 impl Solver for Solution {
     fn get_input(&self) -> &'static str {
         INPUT
@@ -77,52 +108,41 @@ impl Solver for Solution {
     }
 
     fn solve_part1(&self) -> String {
-        let mut no_beacons: HashSet<isize> = HashSet::new();
-
         let y = self.part1_row;
-        let mut ranges = self
+        let merged_ranges = self.get_ranges(y);
+
+        let beacons = self
             .sensors
             .iter()
-            .filter(|s| (s.min_y..=s.max_y).contains(&y))
-            .map(|s| {
-                let offset = (y - s.pos.1).abs();
-                (s.min_x + offset, s.max_x - offset)
+            .filter(|s| {
+                s.beacon.pos.1 == y
+                    && merged_ranges
+                        .iter()
+                        .filter(|(r1, r2)| (r1..=r2).contains(&&s.beacon.pos.0))
+                        .count()
+                        > 0
             })
-            .collect::<Vec<(isize, isize)>>();
+            .map(|s| s.beacon.pos.0)
+            .collect::<HashSet<isize>>()
+            .len();
 
-        ranges.sort_by_key(|r| r.0);
-        let first = ranges.first().unwrap();
-        let merged_ranges = ranges.iter().skip(1).fold(vec![first], |mut acc, r| {
-            let last = acc.last_mut().unwrap();
-            if r.0 <= last.1 {
-                last.1 = r.1;
-            } else {
-                acc.push(r);
-            }
-            acc
-        });
+        let count = merged_ranges
+            .iter()
+            .fold(0, |acc, (r1, r2)| acc + 1 + r2 - r1);
 
-        let beacon_count = self.sensors.iter().filter(|s| s.beacon.pos.1 == y).count();
-
-        no_beacons.len().to_string()
+        (count - beacons as isize).to_string()
     }
 
     fn solve_part2(&self) -> String {
-        let mut b = 0;
         for y in 0..self.part2_max {
-            let ranges = self
-                .sensors
-                .iter()
-                .filter(|s| (s.min_y..=s.max_y).contains(&y))
-                .map(|s| {
-                    let offset = (y - s.pos.1).abs();
-                    0.max(s.min_x + offset)..=self.part2_max.max(s.max_x - offset)
-                })
-                .collect::<Vec<RangeInclusive<isize>>>();
-            b += ranges.len();
+            let ranges = self.get_ranges_between(y, 0, self.part2_max);
+            if ranges.len() == 2 {
+                println!("{y} {ranges:#?}");
+                return (((ranges[0].1 + 1) * 4000000) + y).to_string();
+            }
         }
 
-        b.to_string()
+        "failed to find!".to_string()
     }
 }
 
@@ -169,7 +189,7 @@ Sensor at x=20, y=1: closest beacon is at x=15, y=3"
         let mut solver = Solution::default();
         solver.with_input(get_example_input());
         let solution = solver.solve_part2();
-        assert_eq!(solution, "");
+        assert_eq!(solution, "56000011");
     }
 
     #[test]
@@ -192,7 +212,7 @@ Sensor at x=20, y=1: closest beacon is at x=15, y=3"
         let mut solver = Solution::default();
         solver.with_input(solver.get_input());
         let solution = solver.solve_part2();
-        assert_eq!(solution, "");
+        assert_eq!(solution, "13337919186981");
     }
 }
 
