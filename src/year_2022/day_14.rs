@@ -3,8 +3,8 @@ use std::{
     i16::MAX,
     ops::{Add, AddAssign},
     str::FromStr,
-    thread,
-    time::Duration,
+    // thread,
+    // time::Duration,
 };
 
 use crate::solver::Solver;
@@ -223,40 +223,40 @@ mod test {
     }
 }
 
-const X_OFFSET: i16 = -300;
-const Y_OFFSET: i16 = 2;
-impl Solution {
-    fn clear_terminal(&self) {
-        print!("{esc}c", esc = 27 as char);
-        print!("{:\n>250}", "");
-    }
+// const X_OFFSET: i16 = -300;
+// const Y_OFFSET: i16 = 2;
+// impl Solution {
+//     fn clear_terminal(&self) {
+//         print!("{esc}c", esc = 27 as char);
+//         print!("{:\n>250}", "");
+//     }
 
-    fn draw_sand(&self, sand: &HashSet<Point>) {
-        sand.iter().for_each(|Point(x, y)| {
-            print!("\x1b[{};{}H", *y + Y_OFFSET, *x + X_OFFSET);
-            print!("o");
-        });
-    }
-    fn draw_rocks(&self) {
-        self.rock.iter().for_each(|Point(x, y)| {
-            print!("\x1b[{};{}H", *y + Y_OFFSET, *x + X_OFFSET);
-            print!("x");
-        });
+//     fn draw_sand(&self, sand: &HashSet<Point>) {
+//         sand.iter().for_each(|Point(x, y)| {
+//             print!("\x1b[{};{}H", *y + Y_OFFSET, *x + X_OFFSET);
+//             print!("o");
+//         });
+//     }
+//     fn draw_rocks(&self) {
+//         self.rock.iter().for_each(|Point(x, y)| {
+//             print!("\x1b[{};{}H", *y + Y_OFFSET, *x + X_OFFSET);
+//             print!("x");
+//         });
 
-        for x in 0..500 {
-            print!("\x1b[{};{}H", self.max_y + Y_OFFSET + 2, x);
-            print!("x");
-        }
-    }
+//         for x in 0..500 {
+//             print!("\x1b[{};{}H", self.max_y + Y_OFFSET + 2, x);
+//             print!("x");
+//         }
+//     }
 
-    fn animate(&self, sand: &Point, prev: &Point) {
-        thread::sleep(Duration::from_millis(16));
-        print!("\x1b[{};{}H", sand.1 + Y_OFFSET, sand.0 + X_OFFSET);
-        print!("o");
-        print!("\x1b[{};{}H", prev.1 + Y_OFFSET, prev.0 + X_OFFSET);
-        print!(" ");
-    }
-}
+//     fn animate(&self, sand: &Point, prev: &Point) {
+//         thread::sleep(Duration::from_millis(16));
+//         print!("\x1b[{};{}H", sand.1 + Y_OFFSET, sand.0 + X_OFFSET);
+//         print!("o");
+//         print!("\x1b[{};{}H", prev.1 + Y_OFFSET, prev.0 + X_OFFSET);
+//         print!(" ");
+//     }
+// }
 
 const INPUT: &str = "\
 521,171 -> 525,171
