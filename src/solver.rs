@@ -46,39 +46,34 @@ impl Solvers {
         }
     }
 
-    pub fn run_all(&mut self) {
+    pub fn run_all(&mut self, year: usize, runs: usize) {
         for day in 0..self.solvers.len() {
-            self.run(day);
+            self.run(year, day, runs);
         }
     }
 
-    pub fn run(&mut self, day: usize) {
+    pub fn run(&mut self, year: usize, day: usize, runs: usize) {
         let d = day + 1;
         println!("\n--- DAY {d:0>2} ---");
 
         let solver = self.solvers.get_mut(day).unwrap();
 
-        #[cfg(debug_assertions)]
-        let run_count = 1;
-        #[cfg(not(debug_assertions))]
-        let run_count = 10;
-
-        println!("averaged over {run_count} runs");
+        println!("averaged over {runs} runs");
         let part1_start = Instant::now();
         let mut solution1 = "".into();
-        for _ in 0..run_count {
+        for _ in 0..runs {
             solver.with_input(solver.get_input());
             solution1 = solver.solve_part1();
         }
-        let part1_dur = part1_start.elapsed() / run_count;
+        let part1_dur = part1_start.elapsed() / runs as u32;
 
         let part2_start = Instant::now();
         let mut solution2 = "".into();
-        for _ in 0..run_count {
+        for _ in 0..runs {
             solver.with_input(solver.get_input());
             solution2 = solver.solve_part2();
         }
-        let part2_dur = part2_start.elapsed() / run_count;
+        let part2_dur = part2_start.elapsed().as_nanos() / runs as u128;
 
         println!("part 1 ({part1_dur:?}): {solution1}");
         println!("part 2 ({part2_dur:?}): {solution2}");
