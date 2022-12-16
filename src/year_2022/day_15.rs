@@ -1,8 +1,4 @@
-use std::{
-    collections::HashSet,
-    ops::{AddAssign, Range, RangeBounds, RangeInclusive},
-    str::FromStr,
-};
+use std::{collections::HashSet, str::FromStr};
 
 use crate::solver::Solver;
 
@@ -17,7 +13,6 @@ struct Beacon {
 #[derive(Debug)]
 struct Sensor {
     pos: Position,
-    dist_to_beacon: isize,
     min_x: isize,
     max_x: isize,
     min_y: isize,
@@ -47,7 +42,6 @@ impl FromStr for Sensor {
 
         let sensor = Sensor {
             pos: Position(sx, sy),
-            dist_to_beacon: dist,
             min_x: sx - dist,
             max_x: sx + dist,
             min_y: sy - dist,
@@ -82,7 +76,7 @@ impl Solution {
             .collect::<Vec<(isize, isize)>>();
 
         ranges.sort_by_key(|r| r.0);
-        let first = ranges.first().unwrap().clone();
+        let first = *ranges.first().unwrap();
         let merged_ranges = ranges.iter().skip(1).fold(vec![first], |mut acc, r| {
             let last = acc.last_mut().unwrap();
             if r.0 <= last.1 {
@@ -137,7 +131,6 @@ impl Solver for Solution {
         for y in 0..self.part2_max {
             let ranges = self.get_ranges_between(y, 0, self.part2_max);
             if ranges.len() == 2 {
-                println!("{y} {ranges:#?}");
                 return (((ranges[0].1 + 1) * 4000000) + y).to_string();
             }
         }
