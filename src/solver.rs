@@ -60,7 +60,7 @@ impl Solvers {
 
         println!("averaged over {runs} runs");
         let part1_start = Instant::now();
-        let mut solution1 = "".into();
+        let mut solution1 = "".to_string();
         for _ in 0..runs {
             solver.with_input(solver.get_input());
             solution1 = solver.solve_part1();
@@ -68,7 +68,7 @@ impl Solvers {
         let part1_dur = part1_start.elapsed() / runs as u32;
 
         let part2_start = Instant::now();
-        let mut solution2 = "".into();
+        let mut solution2 = "".to_string();
         for _ in 0..runs {
             solver.with_input(solver.get_input());
             solution2 = solver.solve_part2();

@@ -1,13 +1,15 @@
-use std::{cell::RefCell, collections::HashMap, str::FromStr};
+use std::{
+    collections::{HashMap, HashSet},
+    str::FromStr,
+};
 
 use crate::solver::Solver;
 
 #[derive(Default, Debug, Clone)]
 struct Valve {
     key: String,
-    is_open: RefCell<bool>,
     flow_rate: usize,
-    neighbors: Vec<String>,
+    neighbors: Vec<(String, usize)>,
 }
 
 impl FromStr for Valve {
@@ -22,9 +24,8 @@ impl FromStr for Valve {
             .trim_start_matches(|c: char| c.is_ascii_lowercase() || c.is_ascii_whitespace());
         Ok(Self {
             key: key.to_string(),
-            is_open: RefCell::new(false),
             flow_rate: flow_rate.parse().unwrap(),
-            neighbors: neighbors.split(", ").map(|l| l.to_string()).collect(),
+            neighbors: neighbors.split(", ").map(|l| (l.to_string(), 1)).collect(),
         })
     }
 }
@@ -71,12 +72,54 @@ impl<'a> Iterator for ValveNetworkIter<'a> {
             valve
                 .neighbors
                 .iter()
-                .filter(|v| !self.visited.contains_key(*v))
-                .map(|n| (next.0 + 1, n.clone())),
+                .filter(|v| !self.visited.contains_key(&*v.0))
+                .map(|v| (next.0 + v.1, v.0.clone())),
         );
 
         Some((next.0, valve))
     }
+}
+
+fn find_optimal_flow(
+    network: &ValveNetwork,
+    open_valves: &HashSet<String>,
+    minutes: usize,
+    flow_rate: usize,
+    flowed: usize,
+    current_key: String,
+) -> usize {
+    let next_valves = network
+        .iter(current_key)
+        .filter(|(mins, v)| *mins < minutes && v.flow_rate > 0 && !open_valves.contains(&v.key))
+        .collect::<Vec<(usize, &Valve)>>();
+
+    if next_valves.len() == 0 {
+        return flowed + (flow_rate * minutes);
+    }
+
+    next_valves
+        .iter()
+        .map(|(mins, v)| {
+            let mut open_valves = open_valves.clone();
+            let is_open = open_valves.contains(&v.key);
+            let mut flowed = flowed;
+            let mut flow_rate = flow_rate;
+            if !is_open {
+                open_valves.insert(v.key.clone());
+                flowed += flow_rate * mins;
+                flow_rate += v.flow_rate;
+            }
+            find_optimal_flow(
+                &network,
+                &open_valves,
+                minutes - mins,
+                flow_rate,
+                flowed,
+                v.key.clone(),
+            )
+        })
+        .max()
+        .unwrap()
 }
 
 #[derive(Default, Debug)]
@@ -102,71 +145,61 @@ impl Solver for Solution {
     }
 
     fn solve_part1(&self) -> String {
-        let network = self.input.clone();
-        let mut minutes = 30;
-        let mut flowed = 0;
-        let mut flow_rate = 0;
-        let mut current_key = "AA".to_string();
-
-        while minutes > 0 {
-            println!("\n");
-            let mut next = network
-                .iter(current_key.clone())
-                .filter(|(mins, v)| *mins < minutes && !*v.is_open.borrow())
-                .collect::<Vec<(usize, &Valve)>>();
-            next.sort_by_key(|(mins, v)| {
-                (minutes as isize - (*mins as isize)) * v.flow_rate as isize
-            });
-            next.reverse();
-
-            next.iter().for_each(|(mins, v)| {
-                println!(
-                    "{mins} {} {v:?}",
-                    (minutes as isize - (*mins as isize)) * v.flow_rate as isize
-                );
-            });
-            println!("\n");
-
-            if let Some((mins, next_valve)) = network
-                .iter(current_key)
-                .filter(|(mins, v)| *mins < minutes && !*v.is_open.borrow())
-                .max_by_key(|(mins, v)| {
-                    (minutes as isize - (*mins as isize)) * v.flow_rate as isize
-                })
-            {
-                minutes -= mins;
-                println!("{minutes} {mins} {next_valve:?}");
-                flowed += flow_rate * mins;
-                flow_rate += next_valve.flow_rate;
-                *next_valve.is_open.borrow_mut() = true;
-                current_key = next_valve.key.clone();
-            } else {
-                break;
-            }
-        }
-
-        /*
-        DD
-        BB
-        JJ
-        HH
-        EE
-        CC
-        */
-        // .for_each(|(i, f)| println!("{i} -> {f:?}"));
-
-        // while minutes > 0 {
-        //     let next = network.get(&current).unwrap();
-        //     if !next.is_open && next.flow_rate > 0 {
-        //         next.is_open = true;
-        //     }
-        // }
+        let flowed = find_optimal_flow(
+            &self.input.clone(),
+            &HashSet::new(),
+            30,
+            0,
+            0,
+            "AA".to_string(),
+        );
 
         flowed.to_string()
     }
 
     fn solve_part2(&self) -> String {
-        "".to_string()
+        let mut valves = self
+            .input
+            .iter("AA".to_string())
+            .filter(|(_, v)| v.flow_rate > 0)
+            .map(|v| v.1)
+            .collect::<Vec<&Valve>>();
+
+        valves.sort_by_key(|v| v.flow_rate);
+
+        let valves = valves
+            .iter()
+            .map(|v| v.key.clone())
+            .collect::<Vec<String>>();
+
+        let mut biggest_flow = 0;
+        for i in 1..valves.len() - 1 {
+            let mut valves = valves.clone();
+            let open_valves = valves.drain(0..i).collect::<HashSet<String>>();
+
+            let flowed1 = find_optimal_flow(
+                &self.input.clone(),
+                &open_valves,
+                26,
+                0,
+                0,
+                "AA".to_string(),
+            );
+
+            let flowed2 = find_optimal_flow(
+                &self.input.clone(),
+                &valves.into_iter().collect(),
+                26,
+                0,
+                0,
+                "AA".to_string(),
+            );
+
+            biggest_flow = biggest_flow.max(flowed1 + flowed2);
+            println!("flowed: {biggest_flow}");
+        }
+
+        biggest_flow.to_string()
     }
 }
 
@@ -208,7 +241,7 @@ Valve JJ has flow rate=21; tunnel leads to valve II"
         let mut solver = Solution::default();
         solver.with_input(get_example_input());
         let solution = solver.solve_part2();
-        assert_eq!(solution, "");
+        assert_eq!(solution, "1707");
     }
 
     #[test]
@@ -223,7 +256,7 @@ Valve JJ has flow rate=21; tunnel leads to valve II"
         let mut solver = Solution::default();
         solver.with_input(solver.get_input());
         let solution = solver.solve_part1();
-        assert_eq!(solution, "");
+        assert_eq!(solution, "2059");
     }
 
     #[test]
