@@ -73,7 +73,7 @@ impl Solvers {
             solver.with_input(solver.get_input());
             solution2 = solver.solve_part2();
         }
-        let part2_dur = part2_start.elapsed().as_nanos() / runs as u128;
+        let part2_dur = part2_start.elapsed() / runs as u32;
 
         println!("part 1 ({part1_dur:?}): {solution1}");
         println!("part 2 ({part2_dur:?}): {solution2}");

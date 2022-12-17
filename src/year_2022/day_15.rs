@@ -3,7 +3,7 @@ use std::{collections::HashSet, str::FromStr};
 use crate::solver::Solver;
 
 #[derive(Debug, Hash)]
-struct Position(i32, i32);
+struct Position(i64, i64);
 
 #[derive(Debug)]
 struct Beacon {
@@ -13,10 +13,10 @@ struct Beacon {
 #[derive(Debug)]
 struct Sensor {
     pos: Position,
-    min_x: i32,
-    max_x: i32,
-    min_y: i32,
-    max_y: i32,
+    min_x: i64,
+    max_x: i64,
+    min_y: i64,
+    max_y: i64,
     beacon: Beacon,
 }
 
@@ -29,10 +29,10 @@ impl FromStr for Sensor {
             .unwrap();
         let (sx, sy) = sensor.split_once(", y=").unwrap();
         let (bx, by) = beacon.split_once(", y=").unwrap();
-        let bx: i32 = bx.parse().unwrap();
-        let by: i32 = by.parse().unwrap();
-        let sx: i32 = sx.parse().unwrap();
-        let sy: i32 = sy.parse().unwrap();
+        let bx: i64 = bx.parse().unwrap();
+        let by: i64 = by.parse().unwrap();
+        let sx: i64 = sx.parse().unwrap();
+        let sy: i64 = sy.parse().unwrap();
 
         let dist = (sx - bx).abs() + (sy - by).abs();
 
@@ -55,16 +55,16 @@ impl FromStr for Sensor {
 #[derive(Default, Debug)]
 pub struct Solution {
     sensors: Vec<Sensor>,
-    part1_row: i32,
-    part2_max: i32,
+    part1_row: i64,
+    part2_max: i64,
 }
 
 impl Solution {
-    fn get_ranges(&self, y: i32) -> Vec<(i32, i32)> {
-        self.get_ranges_between(y, i32::MIN, i32::MAX)
+    fn get_ranges(&self, y: i64) -> Vec<(i64, i64)> {
+        self.get_ranges_between(y, i64::MIN, i64::MAX)
     }
 
-    fn get_ranges_between(&self, y: i32, min_x: i32, max_x: i32) -> Vec<(i32, i32)> {
+    fn get_ranges_between(&self, y: i64, min_x: i64, max_x: i64) -> Vec<(i64, i64)> {
         let mut ranges = self
             .sensors
             .iter()
@@ -73,7 +73,7 @@ impl Solution {
                 let offset = (y - s.pos.1).abs();
                 (min_x.max(s.min_x + offset), max_x.min(s.max_x - offset))
             })
-            .collect::<Vec<(i32, i32)>>();
+            .collect::<Vec<(i64, i64)>>();
 
         ranges.sort_by_key(|r| r.0);
         let first = *ranges.first().unwrap();
@@ -117,14 +117,14 @@ impl Solver for Solution {
                         > 0
             })
             .map(|s| s.beacon.pos.0)
-            .collect::<HashSet<i32>>()
+            .collect::<HashSet<i64>>()
             .len();
 
         let count = merged_ranges
             .iter()
             .fold(0, |acc, (r1, r2)| acc + 1 + r2 - r1);
 
-        (count - beacons as i32).to_string()
+        (count - beacons as i64).to_string()
     }
 
     fn solve_part2(&self) -> String {
