@@ -6,25 +6,37 @@ mod year_2020;
 mod year_2021;
 mod year_2022;
 
+struct Args {
+    day: usize,
+    year: usize,
+    runs: usize,
+}
+
 fn main() {
     let mut solvers = Solvers::new();
-    let args: Vec<String> = std::env::args().collect();
-    let runs = if let Some(r) = args.get(2).and_then(|r| r.parse::<usize>().ok()) {
-        r
-    } else {
-        1
+    let mut args = Args {
+        day: 0, // 0 implies run all
+        year: 2022,
+        runs: 1,
     };
 
-    let year = if let Some(r) = args.get(3).and_then(|r| r.parse::<usize>().ok()) {
-        r
-    } else {
-        2022
-    };
+    let raw_args: Vec<String> = std::env::args().collect();
 
-    if let Some(a) = args.get(1) {
-        let day = a.parse::<usize>().unwrap();
-        solvers.run(year, day - 1, runs);
+    if let Some(runs) = raw_args.get(2).and_then(|r| r.parse::<usize>().ok()) {
+        args.runs = runs;
+    }
+
+    if let Some(year) = raw_args.get(3).and_then(|r| r.parse::<usize>().ok()) {
+        args.year = year;
+    }
+
+    if let Some(day) = raw_args.get(1).and_then(|r| r.parse::<usize>().ok()) {
+        args.day = day;
+    }
+
+    if args.day == 0 {
+        solvers.run_all(args.year, args.runs);
     } else {
-        solvers.run_all(year, runs);
+        solvers.run(args.year, args.day, args.runs);
     };
 }

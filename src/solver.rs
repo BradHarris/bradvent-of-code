@@ -9,73 +9,76 @@ pub trait Solver {
     fn solve_part2(&self) -> String;
 }
 
-pub struct Solvers {
-    solvers: Vec<Box<dyn Solver>>,
-}
+pub struct Solvers;
 
 impl Solvers {
     pub fn new() -> Self {
-        Self {
-            solvers: vec![
-                Box::new(day_01::Solution::default()),
-                Box::new(day_02::Solution::default()),
-                Box::new(day_03::Solution::default()),
-                Box::new(day_04::Solution::default()),
-                Box::new(day_05::Solution::default()),
-                Box::new(day_06::Solution::default()),
-                Box::new(day_07::Solution::default()),
-                Box::new(day_08::Solution::default()),
-                Box::new(day_09::Solution::default()),
-                Box::new(day_10::Solution::default()),
-                Box::new(day_11::Solution::default()),
-                Box::new(day_12::Solution::default()),
-                Box::new(day_13::Solution::default()),
-                Box::new(day_14::Solution::default()),
-                Box::new(day_15::Solution::default()),
-                Box::new(day_16::Solution::default()),
-                // Box::new(day_17::Solution::default()),
-                // Box::new(day_18::Solution::default()),
-                // Box::new(day_19::Solution::default()),
-                // Box::new(day_20::Solution::default()),
-                // Box::new(day_21::Solution::default()),
-                // Box::new(day_22::Solution::default()),
-                // Box::new(day_23::Solution::default()),
-                // Box::new(day_24::Solution::default()),
-                // Box::new(day_25::Solution::default()),
-            ],
+        Self
+    }
+
+    fn get_solver(&self, year: usize, day: usize) -> Option<Box<dyn Solver>> {
+        match (year, day) {
+            (2022, 1) => Some(Box::new(day_01::Solution::default())),
+            (2022, 2) => Some(Box::new(day_02::Solution::default())),
+            (2022, 3) => Some(Box::new(day_03::Solution::default())),
+            (2022, 4) => Some(Box::new(day_04::Solution::default())),
+            (2022, 5) => Some(Box::new(day_05::Solution::default())),
+            (2022, 6) => Some(Box::new(day_06::Solution::default())),
+            (2022, 7) => Some(Box::new(day_07::Solution::default())),
+            (2022, 8) => Some(Box::new(day_08::Solution::default())),
+            (2022, 9) => Some(Box::new(day_09::Solution::default())),
+            (2022, 10) => Some(Box::new(day_10::Solution::default())),
+            (2022, 11) => Some(Box::new(day_11::Solution::default())),
+            (2022, 12) => Some(Box::new(day_12::Solution::default())),
+            (2022, 13) => Some(Box::new(day_13::Solution::default())),
+            (2022, 14) => Some(Box::new(day_14::Solution::default())),
+            (2022, 15) => Some(Box::new(day_15::Solution::default())),
+            (2022, 16) => Some(Box::new(day_16::Solution::default())),
+            _ => None,
         }
     }
 
     pub fn run_all(&mut self, year: usize, runs: usize) {
-        for day in 0..self.solvers.len() {
+        for day in 1..25 {
             self.run(year, day, runs);
         }
     }
 
     pub fn run(&mut self, year: usize, day: usize, runs: usize) {
-        let d = day + 1;
-        println!("\n--- DAY {d:0>2} ---");
+        println!("\n--- YEAR {year} - DAY {day:0>2} ---");
 
-        let solver = self.solvers.get_mut(day).unwrap();
+        // let solver = self.solvers.get_mut(day).unwrap();
 
         println!("averaged over {runs} runs");
         let part1_start = Instant::now();
         let mut solution1 = "".to_string();
         for _ in 0..runs {
-            solver.with_input(solver.get_input());
-            solution1 = solver.solve_part1();
+            if let Some(mut solver) = self.get_solver(year, day) {
+                solver.with_input(solver.get_input());
+                solution1 = solver.solve_part1();
+            }
         }
         let part1_dur = part1_start.elapsed() / runs as u32;
+        println!("part 1 ({part1_dur:?}): {solution1}");
 
         let part2_start = Instant::now();
         let mut solution2 = "".to_string();
         for _ in 0..runs {
-            solver.with_input(solver.get_input());
-            solution2 = solver.solve_part2();
+            if let Some(mut solver) = self.get_solver(year, day) {
+                solver.with_input(solver.get_input());
+                solution2 = solver.solve_part2();
+            }
         }
         let part2_dur = part2_start.elapsed() / runs as u32;
-
-        println!("part 1 ({part1_dur:?}): {solution1}");
         println!("part 2 ({part2_dur:?}): {solution2}");
     }
 }
+
+// impl Year2022 {
+//     fn new(day: usize) -> Option<Year2022> {
+//         match day {
+//             1 => Some(Year2022::Day1(day_01::Solution::default())),
+//             _ => None,
+//         }
+//     }
+// }
