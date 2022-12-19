@@ -61,6 +61,7 @@ impl<'a> Iterator for ValveNetworkBFSIter<'a> {
         let valve = self.network.0.get(&next.1).unwrap();
         self.visited.insert(next.1);
 
+        #[allow(clippy::needless_collect)]
         let to_visit = valve
             .neighbors
             .iter()

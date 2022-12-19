@@ -3,35 +3,35 @@ use std::str::FromStr;
 use crate::solver::Solver;
 
 #[derive(Debug, Clone, PartialEq)]
-enum RPS {
+enum Rps {
     Rock,
     Paper,
     Scissors,
 }
 
-impl FromStr for RPS {
+impl FromStr for Rps {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "A" | "X" => Ok(RPS::Rock),
-            "B" | "Y" => Ok(RPS::Paper),
-            "C" | "Z" => Ok(RPS::Scissors),
+            "A" | "X" => Ok(Rps::Rock),
+            "B" | "Y" => Ok(Rps::Paper),
+            "C" | "Z" => Ok(Rps::Scissors),
             _ => Err(format!("{s} is not a valid RPS")),
         }
     }
 }
 
-impl RPS {
+impl Rps {
     fn score(&self) -> usize {
         match self {
-            RPS::Rock => 1,
-            RPS::Paper => 2,
-            RPS::Scissors => 3,
+            Rps::Rock => 1,
+            Rps::Paper => 2,
+            Rps::Scissors => 3,
         }
     }
 
-    fn fight(&self, enemy: RPS) -> usize {
+    fn fight(&self, enemy: Rps) -> usize {
         if enemy == self.win_to() {
             6
         } else if enemy == self.lose_to() {
@@ -41,23 +41,23 @@ impl RPS {
         }
     }
 
-    fn lose_to(&self) -> RPS {
+    fn lose_to(&self) -> Rps {
         match self {
-            RPS::Rock => RPS::Paper,
-            RPS::Paper => RPS::Scissors,
-            RPS::Scissors => RPS::Rock,
+            Rps::Rock => Rps::Paper,
+            Rps::Paper => Rps::Scissors,
+            Rps::Scissors => Rps::Rock,
         }
     }
 
-    fn win_to(&self) -> RPS {
+    fn win_to(&self) -> Rps {
         match self {
-            RPS::Rock => RPS::Scissors,
-            RPS::Paper => RPS::Rock,
-            RPS::Scissors => RPS::Paper,
+            Rps::Rock => Rps::Scissors,
+            Rps::Paper => Rps::Rock,
+            Rps::Scissors => Rps::Paper,
         }
     }
 
-    fn draw(&self) -> RPS {
+    fn draw(&self) -> Rps {
         self.clone()
     }
 }
@@ -104,7 +104,7 @@ impl Solver for Solution {
     fn solve_part1(&self) -> String {
         self.input
             .iter()
-            .map(|(enemy, you)| (enemy.parse::<RPS>().unwrap(), you.parse::<RPS>().unwrap()))
+            .map(|(enemy, you)| (enemy.parse::<Rps>().unwrap(), you.parse::<Rps>().unwrap()))
             .fold(0, |acc, (enemy, you)| acc + you.score() + you.fight(enemy))
             .to_string()
     }
@@ -114,7 +114,7 @@ impl Solver for Solution {
             .iter()
             .map(|(enemy, expected)| {
                 (
-                    enemy.parse::<RPS>().unwrap(),
+                    enemy.parse::<Rps>().unwrap(),
                     expected.parse::<Round>().unwrap(),
                 )
             })
