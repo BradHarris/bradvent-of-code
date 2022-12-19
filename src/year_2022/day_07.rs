@@ -68,7 +68,7 @@ impl<'a> Iterator for DirectoryIter<'a> {
 
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(d) = self.stack.pop() {
-            self.stack.extend(d.children.iter().map(|(_, dir)| dir));
+            self.stack.extend(d.children.values());
             Some(d)
         } else {
             None

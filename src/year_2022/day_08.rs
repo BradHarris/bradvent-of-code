@@ -22,7 +22,7 @@ impl Forest {
     }
 
     fn get(&self, row: usize, col: usize) -> Option<&Tree> {
-        self.trees.get(row as usize)?.get(col as usize)
+        self.trees.get(row)?.get(col)
     }
 }
 

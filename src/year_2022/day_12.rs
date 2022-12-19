@@ -52,13 +52,16 @@ impl Grid {
         (x1 - x2).abs() + (y1 - y2).abs()
     }
 
-    fn astar(&self, start: Position, end: Position) -> Vec<Position> {
-        let mut frontier: BinaryHeap<WeightedPosition> = BinaryHeap::from([WeightedPosition {
-            position: start,
-            weight: 0,
-        }]);
-        let mut came_from: HashMap<Position, Option<Position>> = HashMap::from([(start, None)]);
-        let mut cost_so_far: HashMap<Position, i16> = HashMap::from([(start, 0i16)]);
+    fn astar(&self, start: &[Position], end: Position) -> Vec<Position> {
+        let mut frontier: BinaryHeap<WeightedPosition> =
+            BinaryHeap::from_iter(start.iter().map(|position| WeightedPosition {
+                position: *position,
+                weight: 0,
+            }));
+        let mut came_from: HashMap<Position, Option<Position>> =
+            start.iter().map(|start| (*start, None)).collect();
+        let mut cost_so_far: HashMap<Position, i16> =
+            start.iter().map(|start| (*start, 0i16)).collect();
 
         while let Some(current) = frontier.pop() {
             if current.position == end {
@@ -89,7 +92,7 @@ impl Grid {
         }
 
         let mut current = end;
-        while current != start {
+        while !start.contains(&current) {
             path.push(current);
             if let Some(Some(pos)) = came_from.get(&current) {
                 current = *pos;
@@ -167,28 +170,13 @@ impl Solver for Solution {
     }
 
     fn solve_part1(&self) -> String {
-        self.grid.astar(self.start, self.end).len().to_string()
+        self.grid.astar(&[self.start], self.end).len().to_string()
     }
 
     fn solve_part2(&self) -> String {
-        let mut solves: HashMap<Position, usize> = HashMap::new();
-
-        self.alt_starts
-            .iter()
-            .map(|start| {
-                if solves.contains_key(start) {
-                    return *solves.get(start).unwrap();
-                }
-                let path = self.grid.astar(*start, self.end);
-                let len = path.len();
-                path.iter().enumerate().for_each(|(i, p)| {
-                    solves.insert(*p, len - i);
-                });
-                len
-            })
-            .filter(|l| *l > 0)
-            .min()
-            .unwrap()
+        self.grid
+            .astar(&self.alt_starts, self.end)
+            .len()
             .to_string()
     }
 }
