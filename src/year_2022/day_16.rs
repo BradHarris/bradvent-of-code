@@ -83,8 +83,12 @@ impl<'a> Iterator for ValveNetworkBFSIter<'a> {
         let to_visit = valve
             .neighbors
             .iter()
-            .filter(|v| !self.visited.contains(&*v.1) && !self.to_visit.contains(v))
             .map(|v| (next.0 + v.0, v.1.clone()))
+            .filter(|v| {
+                let visited = !self.visited.contains(&*v.1);
+                let to_visited = !self.to_visit.contains(v);
+                visited && to_visited
+            })
             .collect::<Vec<(usize, String)>>();
 
         self.to_visit.extend(to_visit.into_iter());
@@ -96,11 +100,10 @@ impl<'a> Iterator for ValveNetworkBFSIter<'a> {
 fn find_optimal_flow(
     dp: &mut HashMap<u32, usize>,
     network: &ValveNetwork,
-    open_valves: u32, // bit mask of open valves
-    minutes: usize,
-    flow_rate: usize,
-    flowed: usize,
     current_key: String,
+    minutes: usize,
+    open_valves: u32, // bit mask of open valves
+    flowed: usize,
 ) {
     let current = dp.get(&open_valves).unwrap_or(&0).to_owned();
     dp.insert(open_valves, flowed.max(current));
@@ -113,11 +116,10 @@ fn find_optimal_flow(
             find_optimal_flow(
                 dp,
                 network,
-                open_valves | v.bit_mask,
-                minutes - mins,
-                flow_rate + v.flow_rate,
-                flowed + (flow_rate * mins),
                 v.key.clone(),
+                minutes - mins,
+                open_valves | v.bit_mask,
+                flowed + (v.flow_rate * (minutes - mins)),
             );
         });
 }
@@ -144,13 +146,14 @@ impl Solver for Solution {
         );
 
         // compact network
-        let compact_network = ValveNetwork(
+        let mut compact_network = ValveNetwork(
             network
                 .0
                 .iter()
-                .filter(|(_, v)| v.key == *"AA" || v.flow_rate > 0)
+                .filter(|(_, v)| v.flow_rate > 0)
                 .enumerate()
                 .map(|(i, (key, v))| {
+                    // println!("{key}, {}", 2u32.pow(i as u32));
                     (
                         key.clone(),
                         Valve {
@@ -170,6 +173,24 @@ impl Solver for Solution {
                 .collect::<HashMap<String, Valve>>(),
         );
 
+        // special case to insert start node with last bit_mask
+        let start_key = "AA".to_string();
+        compact_network.0.insert(
+            start_key.clone(),
+            Valve {
+                bit_mask: 2u32.pow(compact_network.0.len() as u32),
+                key: start_key.clone(),
+                flow_rate: 0,
+                // using network iterator we can build a complete
+                // list of navigatable neighbors ordered by weight
+                neighbors: network
+                    .bfs_iter(start_key.clone())
+                    .filter(|v| &v.1.key != &start_key && v.1.flow_rate > 0)
+                    .map(|(mins, v)| (mins, v.key.clone()))
+                    .collect::<Vec<(usize, String)>>(),
+            },
+        );
+
         self.input = compact_network;
     }
 
@@ -178,45 +199,68 @@ impl Solver for Solution {
         find_optimal_flow(
             &mut solutions,
             &self.input.clone(),
-            0,
+            "AA".to_string(),
             30,
             0,
             0,
-            "AA".to_string(),
         );
 
         let max_flow = solutions.iter().max_by_key(|s| s.1).unwrap();
 
-        println!(
-            "{} {:?}",
-            solutions.len(),
-            self.input
-                .0
-                .iter()
-                .filter(|(_, v)| v.bit_mask & *max_flow.0 != 0)
-                .map(|(k, _)| k.clone())
-                .collect::<Vec<String>>()
-        );
+        // println!(
+        //     "{} {:?}",
+        //     solutions.len(),
+        //     self.input
+        //         .0
+        //         .iter()
+        //         .filter(|(_, v)| v.bit_mask & *max_flow.0 != 0)
+        //         .map(|(k, _)| k.clone())
+        //         .collect::<Vec<String>>()
+        // );
 
         max_flow.1.to_string()
     }
 
     fn solve_part2(&self) -> String {
         let mut solutions = HashMap::new();
-        find_optimal_flow(
-            &mut solutions,
-            &self.input.clone(),
-            0,
-            26,
-            0,
-            0,
-            "AA".to_string(),
-        );
+        let valve_count = self.input.0.len() as u32 - 1;
+        let bit_total = 2_u32.pow(valve_count as u32) - 1;
 
-        // let max_flow = solutions.iter().max_by_key(|s| s.1).unwrap();
+        for i in 1..bit_total {
+            if i % 10 == 0 {
+                println!("{i} / {bit_total} - {}", solutions.len());
+            }
 
-        // println!("{solutions:#?}");
-        "".to_string()
+            if solutions.contains_key(&i) {
+                continue;
+            }
+            find_optimal_flow(
+                &mut solutions,
+                &self.input.clone(),
+                "AA".to_string(),
+                26,
+                i,
+                0,
+            );
+        }
+
+        println!("{} {}", valve_count, solutions.len());
+
+        let max_flow = solutions
+            .iter()
+            .map(|(bit_mask, flow)| {
+                let bit_complement = !bit_mask.to_owned() & bit_total;
+                let other_flow = solutions.get(&bit_complement).unwrap_or(&0).to_owned();
+                println!(
+                    "{bit_mask:b} {bit_complement:b} {} {flow} {other_flow}",
+                    solutions.contains_key(&bit_complement)
+                );
+                flow.to_owned() + other_flow
+            })
+            .max()
+            .unwrap();
+
+        max_flow.to_string()
     }
 }
 
