@@ -20,7 +20,7 @@ impl FromStr for Valve {
             .trim_start_matches("Valve ")
             .split_once(" has flow rate=")
             .unwrap();
-        let (flow_rate, neighbors) = rest.split_once(";").unwrap();
+        let (flow_rate, neighbors) = rest.split_once(';').unwrap();
         let neighbors = neighbors
             .trim_start_matches(|c: char| c.is_ascii_lowercase() || c.is_ascii_whitespace());
         Ok(Self {
@@ -29,25 +29,6 @@ impl FromStr for Valve {
             flow_rate: flow_rate.parse().unwrap(),
             neighbors: neighbors.split(", ").map(|l| (1, l.to_string())).collect(),
         })
-    }
-}
-
-#[derive(Default, Debug, Clone)]
-struct ValveNetwork(HashMap<String, Valve>);
-
-impl ValveNetwork {
-    fn bfs_iter(&self, start: String) -> ValveNetworkBFSIter {
-        ValveNetworkBFSIter::new(&self, start)
-    }
-
-    fn get_neighbors(&self, target: &str) -> Vec<(usize, Valve)> {
-        self.0
-            .get(target)
-            .unwrap()
-            .neighbors
-            .iter()
-            .map(|(mins, key)| (*mins, self.0.get(key).unwrap().clone()))
-            .collect()
     }
 }
 
@@ -71,7 +52,7 @@ impl<'a> Iterator for ValveNetworkBFSIter<'a> {
     type Item = (usize, &'a Valve);
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.to_visit.len() == 0 {
+        if self.to_visit.is_empty() {
             return None;
         }
 
@@ -96,32 +77,42 @@ impl<'a> Iterator for ValveNetworkBFSIter<'a> {
         Some((next.0, valve))
     }
 }
+#[derive(Default, Debug, Clone)]
+struct ValveNetwork(HashMap<String, Valve>);
 
-fn find_optimal_flow(
-    dp: &mut HashMap<u32, usize>,
-    network: &ValveNetwork,
-    current_key: String,
-    minutes: usize,
-    open_valves: u32, // bit mask of open valves
-    flowed: usize,
-) {
-    let current = dp.get(&open_valves).unwrap_or(&0).to_owned();
-    dp.insert(open_valves, flowed.max(current));
+impl ValveNetwork {
+    fn bfs_iter(&self, start: String) -> ValveNetworkBFSIter {
+        ValveNetworkBFSIter::new(self, start)
+    }
 
-    network
-        .get_neighbors(&current_key)
-        .iter()
-        .filter(|(mins, v)| *mins < minutes && (v.bit_mask & open_valves) == 0)
-        .for_each(|(mins, v)| {
-            find_optimal_flow(
-                dp,
-                network,
-                v.key.clone(),
-                minutes - mins,
-                open_valves | v.bit_mask,
-                flowed + (v.flow_rate * (minutes - mins)),
-            );
-        });
+    fn find_optimal_flow(
+        &self,
+        dp: &mut HashMap<u32, usize>,
+        current_key: &str,
+        minutes: usize,
+        open_valves: u32, // bit mask of open valves
+        flowed: usize,
+    ) {
+        let current = dp.get(&open_valves).unwrap_or(&0).to_owned();
+        dp.insert(open_valves, flowed.max(current));
+
+        self.0
+            .get(current_key)
+            .unwrap()
+            .neighbors
+            .iter()
+            .map(|(mins, key)| (mins, self.0.get(key).unwrap()))
+            .filter(|(mins, v)| *mins < &minutes && (v.bit_mask & open_valves) == 0)
+            .for_each(|(mins, v)| {
+                self.find_optimal_flow(
+                    dp,
+                    &v.key,
+                    minutes - mins,
+                    open_valves | v.bit_mask,
+                    flowed + (v.flow_rate * (minutes - mins)),
+                );
+            });
+    }
 }
 
 #[derive(Default, Debug)]
@@ -185,7 +176,7 @@ impl Solver for Solution {
                 // list of navigatable neighbors ordered by weight
                 neighbors: network
                     .bfs_iter(start_key.clone())
-                    .filter(|v| &v.1.key != &start_key && v.1.flow_rate > 0)
+                    .filter(|v| v.1.key != start_key && v.1.flow_rate > 0)
                     .map(|(mins, v)| (mins, v.key.clone()))
                     .collect::<Vec<(usize, String)>>(),
             },
@@ -196,27 +187,9 @@ impl Solver for Solution {
 
     fn solve_part1(&self) -> String {
         let mut solutions = HashMap::new();
-        find_optimal_flow(
-            &mut solutions,
-            &self.input.clone(),
-            "AA".to_string(),
-            30,
-            0,
-            0,
-        );
+        self.input.find_optimal_flow(&mut solutions, "AA", 30, 0, 0);
 
         let max_flow = solutions.iter().max_by_key(|s| s.1).unwrap();
-
-        // println!(
-        //     "{} {:?}",
-        //     solutions.len(),
-        //     self.input
-        //         .0
-        //         .iter()
-        //         .filter(|(_, v)| v.bit_mask & *max_flow.0 != 0)
-        //         .map(|(k, _)| k.clone())
-        //         .collect::<Vec<String>>()
-        // );
 
         max_flow.1.to_string()
     }
@@ -224,37 +197,27 @@ impl Solver for Solution {
     fn solve_part2(&self) -> String {
         let mut solutions = HashMap::new();
         let valve_count = self.input.0.len() as u32 - 1;
-        let bit_total = 2_u32.pow(valve_count as u32) - 1;
+        let bit_total = 2_u32.pow(valve_count) - 1;
 
         for i in 1..bit_total {
-            if i % 10 == 0 {
-                println!("{i} / {bit_total} - {}", solutions.len());
-            }
+            // if i % 100 == 0 {
+            //     println!("{i} / {bit_total} - {}", solutions.len());
+            // }
 
-            if solutions.contains_key(&i) {
-                continue;
-            }
-            find_optimal_flow(
-                &mut solutions,
-                &self.input.clone(),
-                "AA".to_string(),
-                26,
-                i,
-                0,
-            );
+            self.input.find_optimal_flow(&mut solutions, "AA", 26, i, 0);
         }
 
-        println!("{} {}", valve_count, solutions.len());
+        // println!("{} {}", valve_count, solutions.len());
 
         let max_flow = solutions
             .iter()
             .map(|(bit_mask, flow)| {
                 let bit_complement = !bit_mask.to_owned() & bit_total;
                 let other_flow = solutions.get(&bit_complement).unwrap_or(&0).to_owned();
-                println!(
-                    "{bit_mask:b} {bit_complement:b} {} {flow} {other_flow}",
-                    solutions.contains_key(&bit_complement)
-                );
+                // println!(
+                //     "{bit_mask:b} {bit_complement:b} {} {flow} {other_flow}",
+                //     solutions.contains_key(&bit_complement)
+                // );
                 flow.to_owned() + other_flow
             })
             .max()
@@ -325,7 +288,7 @@ Valve JJ has flow rate=21; tunnel leads to valve II"
         let mut solver = Solution::default();
         solver.with_input(solver.get_input());
         let solution = solver.solve_part2();
-        assert_eq!(solution, "");
+        assert_eq!(solution, "2790");
     }
 }
 
