@@ -44,6 +44,7 @@ impl Solvers {
             (2022, 14) => Some(Box::new(year_2022::day_14::Solution::default())),
             (2022, 15) => Some(Box::new(year_2022::day_15::Solution::default())),
             (2022, 16) => Some(Box::new(year_2022::day_16::Solution::default())),
+            (2022, 17) => Some(Box::new(year_2022::day_17::Solution::default())),
             _ => None,
         }
     }
@@ -60,8 +61,6 @@ impl Solvers {
         }
 
         println!("\n--- YEAR {year} - DAY {day:0>2} ---");
-
-        // let solver = self.solvers.get_mut(day).unwrap();
 
         println!("averaged over {runs} runs");
         let part1_start = Instant::now();
@@ -87,12 +86,3 @@ impl Solvers {
         println!("part 2 ({part2_dur:?}): {solution2}");
     }
 }
-
-// impl Year2022 {
-//     fn new(day: usize) -> Option<Year2022> {
-//         match day {
-//             1 => Some(Year2022::Day1(day_01::Solution::default())),
-//             _ => None,
-//         }
-//     }
-// }
