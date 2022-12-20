@@ -31,24 +31,24 @@ enum Shape {
 }
 
 impl Shape {
-    fn get_pieces(&self, x: u8) -> Vec<u8> {
+    fn get_pieces(&self, x: u8) -> [u8; 4] {
         match self {
-            Shape::Flat => vec![0b1111000 >> x],
-            Shape::Cross => vec![0b0100000 >> x, 0b1110000 >> x, 0b0100000 >> x],
-            Shape::Angle => vec![0b1110000 >> x, 0b0010000 >> x, 0b0010000 >> x],
-            Shape::Tall => vec![
+            Shape::Flat => [0b1111000 >> x, 0, 0, 0],
+            Shape::Cross => [0b0100000 >> x, 0b1110000 >> x, 0b0100000 >> x, 0],
+            Shape::Angle => [0b1110000 >> x, 0b0010000 >> x, 0b0010000 >> x, 0],
+            Shape::Tall => [
                 0b1000000 >> x,
                 0b1000000 >> x,
                 0b1000000 >> x,
                 0b1000000 >> x,
             ],
-            Shape::Block => vec![0b1100000 >> x, 0b1100000 >> x],
+            Shape::Block => [0b1100000 >> x, 0b1100000 >> x, 0, 0],
         }
     }
 }
 
 #[derive(Debug, Hash, PartialEq, Eq)]
-struct P(u8, u64);
+struct P(u8, usize);
 
 struct Rock<'a> {
     shape: &'a Shape,
@@ -145,10 +145,9 @@ impl Solver for Solution {
         let mut shapes = self.shapes.iter().cycle();
         let mut rocks: Vec<u8> = Vec::new();
 
-        let mut max_y = 0;
         for _ in 0..2022 {
             let mut rock = Rock {
-                pos: P(MIN_X + 2, max_y + 3),
+                pos: P(MIN_X + 2, rocks.len() + 3),
                 shape: shapes.next().unwrap(),
             };
 
@@ -176,29 +175,151 @@ impl Solver for Solution {
             let pieces = rock.shape.get_pieces(rock.pos.0);
 
             for (y, section) in pieces.iter().enumerate() {
-                let y = y + rock.pos.1 as usize;
+                if section == &0u8 {
+                    break;
+                }
 
+                let y = y + rock.pos.1 as usize;
                 if y >= rocks.len() {
                     rocks.push(*section);
-                    max_y += 1;
                 } else {
                     rocks[y] = rocks[y] | section;
                 }
             }
-            // print_view(&rock, &rocks, max_y);
+            // print_view(&rock, &rocks);
         }
 
-        max_y.to_string()
+        rocks.len().to_string()
     }
 
     fn solve_part2(&self) -> String {
-        "".to_string()
+        let shapes_size = self.shapes.len();
+        let mut jets = self.jets.iter().enumerate().cycle();
+        let mut shapes = self.shapes.iter().enumerate().cycle();
+        let mut rocks: Vec<u8> = Vec::new();
+        let mut pattern_cache: HashMap<([u8; 4], usize, usize), (usize, usize)> = HashMap::new();
+        let mut prev_shape = 0;
+        let mut prev_jet = 0;
+
+        let mut prev_height = 0;
+        let mut prev_rocks_count = 0;
+        let mut rock_count_diff = 0;
+
+        let mut offset_height = 0;
+        let mut offset_rocks = 0;
+
+        let target: u64 = 1_000_0;
+        let mut rock_count = 0;
+        while (rock_count + offset_rocks) < target {
+            rock_count += 1;
+            let (shape_i, shape) = shapes.next().unwrap();
+            let mut rock = Rock {
+                pos: P(MIN_X + 2, rocks.len() + 3),
+                shape,
+            };
+
+            let mut jet_i = 0;
+            loop {
+                let j = jets.next().unwrap();
+                jet_i = j.0;
+                match j.1 {
+                    Dir::Left => {
+                        if rock.can_move_left(&rocks) {
+                            rock.pos.0 -= 1;
+                        }
+                    }
+                    Dir::Right => {
+                        if rock.can_move_right(&rocks) {
+                            rock.pos.0 += 1;
+                        }
+                    }
+                }
+
+                if rock.can_move_down(&rocks) {
+                    rock.pos.1 -= 1;
+                } else {
+                    break;
+                }
+            }
+
+            let pieces = rock.shape.get_pieces(rock.pos.0);
+
+            for (y, section) in pieces.iter().enumerate() {
+                if section == &0u8 {
+                    break;
+                }
+                let y = y + rock.pos.1 as usize;
+                if y >= rocks.len() {
+                    rocks.push(*section);
+                } else {
+                    let new_section = rocks[y] | section;
+                    rocks[y] = new_section;
+
+                    if rocks.len() > 4 {
+                        let last_group: [u8; 4] = rocks[rocks.len() - 4..];
+
+                        let key = (last_group, jet_i, shape_i);
+                        if let Some((old_height, old_rock_count)) = pattern_cache.get(key) {
+                            offset_height += (rocks.len() - old_height)
+                                * (rock_count / (old_rock_count - rock_count));
+                            rock_count = rock_count & (old_rock_count - rock_count);
+                        }
+                    }
+                    // if new_section == 127 || new_section == 63
+                    // // && (shape_i == shapes_size - 1)
+                    // // && (prev_jet == 0 || prev_jet == jet_i)
+                    // {
+                    //     // if prev_height != 0 {
+                    //     //     let skip_rocks = rock_count - prev_rocks_count;
+                    //     //     let skip_height = rocks.len() - prev_height;
+
+                    //     //     while offset_rocks < target - rock_count {
+                    //     //         offset_rocks += skip_rocks;
+                    //     //     }
+
+                    //     //     offset_height = offset_rocks * skip_height;
+                    //     //     println!(
+                    //     //         "rock_count: {rock_count} - skip_height: {skip_height} - skip_rocks: {skip_rocks} - offset_rocks: {offset_rocks} - offset_height:{offset_height}"
+                    //     //     );
+                    //     // }
+
+                    //     let new_rock_count_diff = rock_count - prev_rocks_count;
+                    //     let height_diff = rocks.len() - prev_height;
+                    //     if new_rock_count_diff == rock_count_diff
+                    //         && prev_jet == jet_i
+                    //         && prev_shape == shape_i
+                    //     {
+                    //         println!("good");
+                    //         while offset_rocks < target - rock_count {
+                    //             offset_rocks += rock_count_diff;
+                    //             offset_height += height_diff;
+                    //         }
+                    //     }
+                    //     rock_count_diff = new_rock_count_diff;
+
+                    //     prev_jet = jet_i;
+                    //     prev_shape = shape_i;
+                    //     prev_rocks_count = rock_count;
+
+                    //     prev_height = rocks.len();
+
+                    //     println!(
+                    //         "shape_i: {shape_i} - jet_i: {jet_i} - rock_count_diff: {rock_count_diff} - height_diff: {height_diff}"
+                    //     );
+                    // }
+                }
+            }
+            // print_view(&rock, &rocks);
+        }
+
+        (rocks.len() + offset_height).to_string()
     }
 }
 
-fn print_view(rock: &Rock, rocks: &Vec<u8>, max_y: u64) {
+fn print_view(rock: &Rock, rocks: &Vec<u8>) {
     // return;
     clear_terminal();
+    let max_y = rocks.len();
     println!("--{max_y:0>4}--");
     let max_y = max_y.max(30);
     let min_y = if max_y > 30 { max_y - 30 } else { 0 };
@@ -206,7 +327,7 @@ fn print_view(rock: &Rock, rocks: &Vec<u8>, max_y: u64) {
     for y in (min_y..max_y + 10).rev() {
         print!("|");
         let rocks = rocks.get(y as usize).unwrap_or(&0u8);
-        let rock = if y >= rock.pos.1 && y < rock.pos.1 + shape.len() as u64 {
+        let rock = if y >= rock.pos.1 && y < rock.pos.1 + shape.len() {
             shape.get(y as usize - rock.pos.1 as usize).unwrap_or(&0u8)
         } else {
             &0u8
@@ -247,6 +368,7 @@ mod test {
     use super::*;
 
     fn get_example_input<'a>() -> &'a str {
+        // INPUT
         ">>><<><>><<<>><>>><<<>>><<<><<<>><>><<>>"
     }
 
@@ -272,7 +394,7 @@ mod test {
         let mut solver = Solution::default();
         solver.with_input(get_example_input());
         let solution = solver.solve_part2();
-        assert_eq!(solution, "");
+        assert_eq!(solution, "1514285714288");
     }
 
     #[test]
