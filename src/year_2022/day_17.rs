@@ -22,7 +22,6 @@ impl From<char> for Dir {
 }
 
 #[derive(Debug)]
-#[repr(u8)]
 enum Shape {
     Flat,
     Cross,
@@ -32,28 +31,18 @@ enum Shape {
 }
 
 impl Shape {
-    fn get_pieces(&self, pos: &P) -> Vec<P> {
-        let x = pos.0;
-        let y = pos.1;
-
+    fn get_pieces(&self, x: u8) -> Vec<u8> {
         match self {
-            Shape::Flat => vec![P(x, y), P(x + 1, y), P(x + 2, y), P(x + 3, y)],
-            Shape::Cross => vec![
-                P(x + 1, y),
-                P(x, y + 1),
-                P(x + 1, y + 1),
-                P(x + 2, y + 1),
-                P(x + 1, y + 2),
+            Shape::Flat => vec![0b1111000 >> x],
+            Shape::Cross => vec![0b0100000 >> x, 0b1110000 >> x, 0b0100000 >> x],
+            Shape::Angle => vec![0b1110000 >> x, 0b0010000 >> x, 0b0010000 >> x],
+            Shape::Tall => vec![
+                0b1000000 >> x,
+                0b1000000 >> x,
+                0b1000000 >> x,
+                0b1000000 >> x,
             ],
-            Shape::Angle => vec![
-                P(x, y),
-                P(x + 1, y),
-                P(x + 2, y),
-                P(x + 2, y + 1),
-                P(x + 2, y + 2),
-            ],
-            Shape::Tall => vec![P(x, y), P(x, y + 1), P(x, y + 2), P(x, y + 3)],
-            Shape::Block => vec![P(x, y), P(x + 1, y), P(x, y + 1), P(x + 1, y + 1)],
+            Shape::Block => vec![0b1100000 >> x, 0b1100000 >> x],
         }
     }
 }
@@ -67,7 +56,7 @@ struct Rock<'a> {
 }
 
 impl Rock<'_> {
-    fn can_move_down(&self, rocks: &HashSet<P>) -> bool {
+    fn can_move_down(&self, rocks: &Vec<u8>) -> bool {
         // base case is rock is at y == 0 on the floor
         if self.pos.1 == 0 {
             return false;
@@ -75,24 +64,38 @@ impl Rock<'_> {
 
         !self
             .shape
-            .get_pieces(&P(self.pos.0, self.pos.1 - 1))
+            .get_pieces(self.pos.0)
             .iter()
-            .any(|p| rocks.contains(p))
+            .enumerate()
+            .any(|(y, p)| {
+                if let Some(r) = rocks.get(y + self.pos.1 as usize - 1) {
+                    r & p != 0
+                } else {
+                    false
+                }
+            })
     }
 
-    fn can_move_left(&self, rocks: &HashSet<P>) -> bool {
+    fn can_move_left(&self, rocks: &Vec<u8>) -> bool {
         if self.pos.0 == MIN_X {
             return false;
         }
 
         !self
             .shape
-            .get_pieces(&P(self.pos.0 - 1, self.pos.1))
+            .get_pieces(self.pos.0 - 1)
             .iter()
-            .any(|p| rocks.contains(p))
+            .enumerate()
+            .any(|(y, p)| {
+                if let Some(r) = rocks.get(y + self.pos.1 as usize) {
+                    r & p != 0
+                } else {
+                    false
+                }
+            })
     }
 
-    fn can_move_right(&self, rocks: &HashSet<P>) -> bool {
+    fn can_move_right(&self, rocks: &Vec<u8>) -> bool {
         let x = self.pos.0 + 1;
 
         if match self.shape {
@@ -105,11 +108,13 @@ impl Rock<'_> {
             return false;
         }
 
-        !self
-            .shape
-            .get_pieces(&P(x, self.pos.1))
-            .iter()
-            .any(|p| rocks.contains(p))
+        !self.shape.get_pieces(x).iter().enumerate().any(|(y, p)| {
+            if let Some(r) = rocks.get(y + self.pos.1 as usize) {
+                r & p != 0
+            } else {
+                false
+            }
+        })
     }
 }
 
@@ -122,7 +127,6 @@ pub struct Solution {
 impl Solver for Solution {
     fn get_input(&self) -> &'static str {
         INPUT
-        // ">>><<><>><<<>><>>><<<>>><<<><<<>><>><<>>"
     }
 
     fn with_input(&mut self, input: &str) {
@@ -139,22 +143,17 @@ impl Solver for Solution {
     fn solve_part1(&self) -> String {
         let mut jets = self.jets.iter().cycle();
         let mut shapes = self.shapes.iter().cycle();
-        let mut rocks: HashSet<P> = HashSet::new();
+        let mut rocks: Vec<u8> = Vec::new();
 
-        // start on the floor;
         let mut max_y = 0;
-        let mut rocks_count = 0;
-        while rocks_count < 2022 {
-            rocks_count += 1;
+        for _ in 0..2022 {
             let mut rock = Rock {
                 pos: P(MIN_X + 2, max_y + 3),
                 shape: shapes.next().unwrap(),
             };
 
             loop {
-                // print_view(&rock, &rocks, max_y);
-                let jet = jets.next().unwrap();
-                match jet {
+                match jets.next().unwrap() {
                     Dir::Left => {
                         if rock.can_move_left(&rocks) {
                             rock.pos.0 -= 1;
@@ -174,51 +173,69 @@ impl Solver for Solution {
                 }
             }
 
-            rocks.extend(
-                rock.shape
-                    .get_pieces(&rock.pos)
-                    .into_iter()
-                    .inspect(|p| max_y = max_y.max(p.1 + 1)),
-            );
+            let pieces = rock.shape.get_pieces(rock.pos.0);
+
+            for (y, section) in pieces.iter().enumerate() {
+                let y = y + rock.pos.1 as usize;
+
+                if y >= rocks.len() {
+                    rocks.push(*section);
+                    max_y += 1;
+                } else {
+                    rocks[y] = rocks[y] | section;
+                }
+            }
+            // print_view(&rock, &rocks, max_y);
         }
 
         max_y.to_string()
     }
 
     fn solve_part2(&self) -> String {
-        let mut b = 0u128;
-        for i in 0..1_000_000_000_000u64 {
-            b += 1;
-        }
-        b.to_string()
+        "".to_string()
     }
 }
 
-fn print_view(rock: &Rock, rocks: &HashSet<P>, max_y: u64) {
+fn print_view(rock: &Rock, rocks: &Vec<u8>, max_y: u64) {
     // return;
     clear_terminal();
+    println!("--{max_y:0>4}--");
     let max_y = max_y.max(30);
     let min_y = if max_y > 30 { max_y - 30 } else { 0 };
-    let rock = rock.shape.get_pieces(&rock.pos);
+    let shape = rock.shape.get_pieces(rock.pos.0);
     for y in (min_y..max_y + 10).rev() {
         print!("|");
-        for x in MIN_X..MAX_X {
-            let p = P(x, y);
-            if rocks.contains(&p) {
-                print!("#");
-            } else if rock.contains(&p) {
-                print!("@");
-            } else {
-                print!(".");
-            }
-        }
-        print!("|\n");
+        let rocks = rocks.get(y as usize).unwrap_or(&0u8);
+        let rock = if y >= rock.pos.1 && y < rock.pos.1 + shape.len() as u64 {
+            shape.get(y as usize - rock.pos.1 as usize).unwrap_or(&0u8)
+        } else {
+            &0u8
+        };
+
+        let line = format!("{:#09b}", rock | rocks)
+            .trim_start_matches("0b")
+            .replace("0", ".")
+            .replace("1", "X");
+
+        print!("{line}");
+        print!("|{:0>4}\n", y + 1);
         if y == 0 {
             println!("+-------+");
         }
     }
-    sleep(Duration::from_millis(40));
+    sleep(Duration::from_millis(140));
 }
+
+/*
+6
+5 2
+4 1
+3 0
+2
+1
+
+y 6 -> 6 - 3 + 2
+*/
 
 fn clear_terminal() {
     print!("{esc}c", esc = 27 as char);
