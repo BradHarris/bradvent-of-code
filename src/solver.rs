@@ -64,14 +64,25 @@ impl Solvers {
             .collect::<Vec<(usize, (Duration, Duration))>>();
 
         println!("\n\naveraged over {runs} runs");
-        println!("{: <4} | {: <12} | {: <12}", "day", "part 1", "part 2");
-        results.iter().for_each(|(day, (p1, p2))| {
-            println!(
-                "{day: <4} | {: <12} | {: <12}",
-                format!("{p1:?}"),
-                format!("{p2:?}")
-            )
-        });
+        println!("{: <6} | {: <12} | {: <12}", "day", "part 1", "part 2");
+        let total = results
+            .iter()
+            .inspect(|(day, (p1, p2))| {
+                println!(
+                    "{day: <6} | {: <12} | {: <12}",
+                    format!("{p1:?}"),
+                    format!("{p2:?}")
+                )
+            })
+            .map(|(_, (p1, p2))| *p1 + *p2)
+            .sum::<Duration>();
+
+        println!(
+            "{: <6} | {: <12} | {: <12}",
+            "total",
+            format!("{total:?}"),
+            "---"
+        )
     }
 
     pub fn run(&mut self, year: usize, day: usize, runs: usize) -> Option<(Duration, Duration)> {

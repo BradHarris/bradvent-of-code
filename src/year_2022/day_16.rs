@@ -138,12 +138,12 @@ impl Solver for Solution {
                 .collect::<HashMap<String, Valve>>(),
         );
 
-        // compact network
-        let mut compact_network = ValveNetwork(
+        // compact network using breadth first search iterator
+        let compact_network = ValveNetwork(
             network
                 .0
                 .iter()
-                .filter(|(_, v)| v.flow_rate > 0)
+                .filter(|(_, v)| v.flow_rate > 0 || v.key == "AA".to_string())
                 .enumerate()
                 .map(|(i, (key, v))| {
                     (
@@ -165,24 +165,6 @@ impl Solver for Solution {
                 .collect::<HashMap<String, Valve>>(),
         );
 
-        // special case to insert start node with last bit_mask
-        let start_key = "AA".to_string();
-        compact_network.0.insert(
-            start_key.clone(),
-            Valve {
-                bit_mask: 2u32.pow(compact_network.0.len() as u32),
-                key: start_key.clone(),
-                flow_rate: 0,
-                // using network iterator we can build a complete
-                // list of navigatable neighbors ordered by weight
-                neighbors: network
-                    .bfs_iter(start_key.clone())
-                    .filter(|v| v.1.key != start_key && v.1.flow_rate > 0)
-                    .map(|(mins, v)| (mins, v.key.clone()))
-                    .collect::<Vec<(usize, String)>>(),
-            },
-        );
-
         self.input = compact_network;
     }
 
@@ -202,9 +184,7 @@ impl Solver for Solution {
         for (k1, v1) in solutions.iter() {
             for (k2, v2) in solutions.iter() {
                 if (k1 & k2) == 0 {
-                    if v1 + v2 > total {
-                        total = v1 + v2;
-                    }
+                    total = total.max(v1 + v2);
                 }
             }
         }
