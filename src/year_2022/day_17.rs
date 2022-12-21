@@ -1,6 +1,6 @@
 use std::{collections::HashMap, hash::Hash, thread::sleep, time::Duration};
 
-use crate::{solver::Solver, terminal::clear_terminal};
+use crate::{solver::Solver, utils::clear_terminal};
 
 const MIN_X: u8 = 0;
 const MAX_X: u8 = 7;

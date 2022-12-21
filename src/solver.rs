@@ -1,6 +1,9 @@
 use std::time::{Duration, Instant};
 
-use crate::{year_2020, year_2021, year_2022};
+use crate::{
+    utils::{print_time_results, DayPerfMetric},
+    year_2020, year_2021, year_2022,
+};
 
 pub trait Solver {
     fn get_input(&self) -> &'static str;
@@ -56,33 +59,18 @@ impl Solvers {
         let results = (1..=25)
             .flat_map(|day| {
                 if let Some(d) = self.run(year, day, runs) {
-                    Some((day, d))
+                    Some(DayPerfMetric {
+                        day,
+                        part1: d.0,
+                        part2: d.1,
+                    })
                 } else {
                     None
                 }
             })
-            .collect::<Vec<(usize, (Duration, Duration))>>();
+            .collect::<Vec<DayPerfMetric>>();
 
-        println!("\n\naveraged over {runs} runs");
-        println!("{: <6} | {: <12} | {: <12}", "day", "part 1", "part 2");
-        let total = results
-            .iter()
-            .inspect(|(day, (p1, p2))| {
-                println!(
-                    "{day: <6} | {: <12} | {: <12}",
-                    format!("{p1:?}"),
-                    format!("{p2:?}")
-                )
-            })
-            .map(|(_, (p1, p2))| *p1 + *p2)
-            .sum::<Duration>();
-
-        println!(
-            "{: <6} | {: <12} | {: <12}",
-            "total",
-            format!("{total:?}"),
-            "---"
-        )
+        print_time_results(results, runs);
     }
 
     pub fn run(&mut self, year: usize, day: usize, runs: usize) -> Option<(Duration, Duration)> {
