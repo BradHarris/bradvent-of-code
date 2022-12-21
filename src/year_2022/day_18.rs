@@ -2,7 +2,6 @@ use std::{
     collections::{HashSet, VecDeque},
     i8,
     ops::Add,
-    str::FromStr,
 };
 
 use crate::solver::Solver;
@@ -10,14 +9,13 @@ use crate::solver::Solver;
 #[derive(Debug, PartialEq, Eq, Hash, Copy, Clone)]
 struct Pos(i8, i8, i8);
 
-impl FromStr for Pos {
-    type Err = String;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let d = s
+impl From<&str> for Pos {
+    fn from(value: &str) -> Self {
+        let d = value
             .split(',')
             .map(|n| n.parse().unwrap())
             .collect::<Vec<i8>>();
-        Ok(Self(d[0], d[1], d[2]))
+        Self(d[0], d[1], d[2])
     }
 }
 
@@ -47,7 +45,7 @@ impl Solver for Solution {
     }
 
     fn with_input(&mut self, input: &str) {
-        self.input = input.lines().map(|l| l.parse().unwrap()).collect();
+        self.input = input.lines().map(|l| l.into()).collect();
     }
 
     fn solve_part1(&self) -> String {
@@ -157,13 +155,6 @@ mod test {
     }
 
     #[test]
-    fn test_parse_example() {
-        let mut solver = Solution::default();
-        solver.with_input(get_example_input());
-        println!("{:#?}", solver);
-    }
-
-    #[test]
     fn test_solution_example1() {
         let mut solver = Solution::default();
         solver.with_input(get_example_input());
@@ -180,13 +171,6 @@ mod test {
     }
 
     #[test]
-    fn test_parse() {
-        let mut solver = Solution::default();
-        solver.with_input(solver.get_input());
-        println!("{:#?}", solver);
-    }
-
-    #[test]
     fn test_solution_part1() {
         let mut solver = Solution::default();
         solver.with_input(solver.get_input());
@@ -199,7 +183,7 @@ mod test {
         let mut solver = Solution::default();
         solver.with_input(solver.get_input());
         let solution = solver.solve_part2();
-        assert_eq!(solution, "");
+        assert_eq!(solution, "2008");
     }
 }
 

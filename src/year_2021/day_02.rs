@@ -79,13 +79,6 @@ forward 2"
     }
 
     #[test]
-    fn test_parse() {
-        let mut solver = Solution::default();
-        solver.with_input(get_input());
-        println!("{:#?}", solver);
-    }
-
-    #[test]
     fn test_solution_example1() {
         let mut solver = Solution::default();
         solver.with_input(get_input());
@@ -106,7 +99,7 @@ forward 2"
         let mut solver = Solution::default();
         solver.with_input(INPUT);
         let solution = solver.solve_part1();
-        assert_eq!(solution, "");
+        assert_eq!(solution, "1936494");
     }
 
     #[test]
@@ -114,7 +107,7 @@ forward 2"
         let mut solver = Solution::default();
         solver.with_input(INPUT);
         let solution = solver.solve_part2();
-        assert_eq!(solution, "");
+        assert_eq!(solution, "1997106066");
     }
 }
 

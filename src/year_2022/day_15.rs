@@ -163,13 +163,6 @@ Sensor at x=20, y=1: closest beacon is at x=15, y=3"
     }
 
     #[test]
-    fn test_parse_example() {
-        let mut solver = Solution::default();
-        solver.with_input(get_example_input());
-        println!("{:#?}", solver);
-    }
-
-    #[test]
     fn test_solution_example1() {
         let mut solver = Solution::default();
         solver.with_input(get_example_input());
@@ -183,13 +176,6 @@ Sensor at x=20, y=1: closest beacon is at x=15, y=3"
         solver.with_input(get_example_input());
         let solution = solver.solve_part2();
         assert_eq!(solution, "56000011");
-    }
-
-    #[test]
-    fn test_parse() {
-        let mut solver = Solution::default();
-        solver.with_input(solver.get_input());
-        println!("{:#?}", solver);
     }
 
     #[test]

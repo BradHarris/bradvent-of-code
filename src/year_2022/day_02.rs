@@ -134,14 +134,10 @@ mod test {
     use super::*;
 
     fn get_example_input<'a>() -> &'a str {
-        ""
-    }
-
-    #[test]
-    fn test_parse_example() {
-        let mut solver = Solution::default();
-        solver.with_input(get_example_input());
-        println!("{:#?}", solver);
+        "\
+A Y
+B X
+C Z"
     }
 
     #[test]
@@ -149,7 +145,7 @@ mod test {
         let mut solver = Solution::default();
         solver.with_input(get_example_input());
         let solution = solver.solve_part1();
-        assert_eq!(solution, "");
+        assert_eq!(solution, "15");
     }
 
     #[test]
@@ -157,14 +153,7 @@ mod test {
         let mut solver = Solution::default();
         solver.with_input(get_example_input());
         let solution = solver.solve_part2();
-        assert_eq!(solution, "");
-    }
-
-    #[test]
-    fn test_parse() {
-        let mut solver = Solution::default();
-        solver.with_input(solver.get_input());
-        println!("{:#?}", solver);
+        assert_eq!(solution, "12");
     }
 
     #[test]
@@ -172,7 +161,7 @@ mod test {
         let mut solver = Solution::default();
         solver.with_input(solver.get_input());
         let solution = solver.solve_part1();
-        assert_eq!(solution, "");
+        assert_eq!(solution, "12535");
     }
 
     #[test]
@@ -180,7 +169,7 @@ mod test {
         let mut solver = Solution::default();
         solver.with_input(solver.get_input());
         let solution = solver.solve_part2();
-        assert_eq!(solution, "");
+        assert_eq!(solution, "15457");
     }
 }
 

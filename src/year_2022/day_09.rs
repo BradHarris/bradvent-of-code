@@ -143,13 +143,6 @@ R 2"
     }
 
     #[test]
-    fn test_parse() {
-        let mut solver = Solution::default();
-        solver.with_input(get_input1());
-        println!("{:#?}", solver.input);
-    }
-
-    #[test]
     fn test_solution_part1() {
         let mut solver = Solution::default();
         solver.with_input(get_input1());

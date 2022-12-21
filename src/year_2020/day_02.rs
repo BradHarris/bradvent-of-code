@@ -94,13 +94,6 @@ mod test {
     }
 
     #[test]
-    fn test_parse_example() {
-        let mut solver = Solution::default();
-        solver.with_input(get_example_input());
-        println!("{:#?}", solver);
-    }
-
-    #[test]
     fn test_solution_example1() {
         let mut solver = Solution::default();
         solver.with_input(get_example_input());
@@ -114,13 +107,6 @@ mod test {
         solver.with_input(get_example_input());
         let solution = solver.solve_part2();
         assert_eq!(solution, "1");
-    }
-
-    #[test]
-    fn test_parse() {
-        let mut solver = Solution::default();
-        solver.with_input(solver.get_input());
-        println!("{:#?}", solver);
     }
 
     #[test]

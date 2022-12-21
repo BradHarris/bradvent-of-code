@@ -231,13 +231,6 @@ Test: divisible by 17
     }
 
     #[test]
-    fn debug_parse() {
-        let mut solver = Solution::default();
-        solver.with_input(get_input());
-        println!("{:#?}", solver.input);
-    }
-
-    #[test]
     fn test_solution_part1() {
         let mut solver = Solution::default();
         solver.with_input(get_input());

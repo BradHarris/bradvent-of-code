@@ -63,13 +63,6 @@ mod test {
     }
 
     #[test]
-    fn test_parse() {
-        let mut solver = Solution::default();
-        solver.with_input(get_input());
-        println!("{:#?}", solver);
-    }
-
-    #[test]
     fn test_solution_example1() {
         let mut solver = Solution::default();
         solver.with_input(get_input());

@@ -90,7 +90,7 @@ impl ValveNetwork {
         &self,
         dp: &mut HashMap<u32, usize>,
         current_key: &str,
-        minutes: usize,
+        time_left: usize,
         open_valves: u32, // bit mask of open valves
         flowed: usize,
     ) {
@@ -103,14 +103,15 @@ impl ValveNetwork {
             .neighbors
             .iter()
             .map(|(mins, key)| (mins, self.0.get(key).unwrap()))
-            .filter(|(mins, v)| *mins < &minutes && (v.bit_mask & open_valves) == 0)
+            .filter(|(mins, v)| *mins < &time_left && (v.bit_mask & open_valves) == 0)
             .for_each(|(mins, v)| {
+                let time_left = time_left - mins;
                 self.find_optimal_flow(
                     dp,
                     &v.key,
-                    minutes - mins,
+                    time_left,
                     open_valves | v.bit_mask,
-                    flowed + (v.flow_rate * (minutes - mins)),
+                    flowed + (v.flow_rate * time_left),
                 );
             });
     }
@@ -145,7 +146,6 @@ impl Solver for Solution {
                 .filter(|(_, v)| v.flow_rate > 0)
                 .enumerate()
                 .map(|(i, (key, v))| {
-                    // println!("{key}, {}", 2u32.pow(i as u32));
                     (
                         key.clone(),
                         Valve {
@@ -197,34 +197,18 @@ impl Solver for Solution {
 
     fn solve_part2(&self) -> String {
         let mut solutions = HashMap::new();
-        let valve_count = self.input.0.len() as u32 - 1;
-        let bit_total = 2_u32.pow(valve_count) - 1;
-
-        for i in 1..bit_total {
-            // if i % 100 == 0 {
-            //     println!("{i} / {bit_total} - {}", solutions.len());
-            // }
-
-            self.input.find_optimal_flow(&mut solutions, "AA", 26, i, 0);
+        self.input.find_optimal_flow(&mut solutions, "AA", 26, 0, 0);
+        let mut total = 0;
+        for (k1, v1) in solutions.iter() {
+            for (k2, v2) in solutions.iter() {
+                if (k1 & k2) == 0 {
+                    if v1 + v2 > total {
+                        total = v1 + v2;
+                    }
+                }
+            }
         }
-
-        // println!("{} {}", valve_count, solutions.len());
-
-        let max_flow = solutions
-            .iter()
-            .map(|(bit_mask, flow)| {
-                let bit_complement = !bit_mask.to_owned() & bit_total;
-                let other_flow = solutions.get(&bit_complement).unwrap_or(&0).to_owned();
-                // println!(
-                //     "{bit_mask:b} {bit_complement:b} {} {flow} {other_flow}",
-                //     solutions.contains_key(&bit_complement)
-                // );
-                flow.to_owned() + other_flow
-            })
-            .max()
-            .unwrap();
-
-        max_flow.to_string()
+        total.to_string()
     }
 }
 
@@ -247,13 +231,6 @@ Valve JJ has flow rate=21; tunnel leads to valve II"
     }
 
     #[test]
-    fn test_parse_example() {
-        let mut solver = Solution::default();
-        solver.with_input(get_example_input());
-        println!("{:#?}", solver);
-    }
-
-    #[test]
     fn test_solution_example1() {
         let mut solver = Solution::default();
         solver.with_input(get_example_input());
@@ -267,13 +244,6 @@ Valve JJ has flow rate=21; tunnel leads to valve II"
         solver.with_input(get_example_input());
         let solution = solver.solve_part2();
         assert_eq!(solution, "1707");
-    }
-
-    #[test]
-    fn test_parse() {
-        let mut solver = Solution::default();
-        solver.with_input(solver.get_input());
-        println!("{:#?}", solver);
     }
 
     #[test]

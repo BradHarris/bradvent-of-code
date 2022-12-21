@@ -99,25 +99,6 @@ v.v..>>v.v
     }
 
     #[test]
-    fn test_parse() {
-        let mut solver = Solution::default();
-        solver.with_input(get_input());
-        for y in 0..solver.height {
-            for x in 0..solver.width {
-                if solver.east_cukes.contains(&Pos(x, y)) {
-                    print!(">");
-                } else if solver.south_cukes.contains(&Pos(x, y)) {
-                    print!("v");
-                } else {
-                    print!(".");
-                }
-                print!(":({x},{y}) ")
-            }
-            println!();
-        }
-    }
-
-    #[test]
     fn test_solution_example1() {
         let mut solver = Solution::default();
         solver.with_input(get_input());
@@ -138,7 +119,6 @@ v.v..>>v.v
         let mut solver = Solution::default();
         solver.with_input(solver.get_input());
         let solution = solver.solve_part1();
-        println!("{solution}");
         assert_eq!(solution, "601");
     }
 }

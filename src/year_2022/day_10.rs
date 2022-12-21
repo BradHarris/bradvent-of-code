@@ -79,7 +79,6 @@ impl Solver for Solution {
                 acc + (((i as isize * 40) + 20) * cpu.register)
             });
 
-        // println!("{:#?}", out);
         signal_strength.to_string()
     }
 
@@ -259,13 +258,6 @@ addx -11
 noop
 noop
 noop"
-    }
-
-    #[test]
-    fn test_parse() {
-        let mut solver = Solution::default();
-        solver.with_input(get_input());
-        println!("{:#?}", solver.input);
     }
 
     #[test]

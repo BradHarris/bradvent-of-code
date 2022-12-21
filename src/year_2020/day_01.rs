@@ -18,11 +18,13 @@ impl Solver for Solution {
 
     fn solve_part1(&self) -> String {
         let target = 2020;
-        self.input
+        let other = self
+            .input
             .iter()
             .find(|x| self.input.contains(&(target - x.to_owned())))
-            .unwrap()
-            .to_string()
+            .unwrap();
+
+        (other * (target - other)).to_string()
     }
 
     fn solve_part2(&self) -> String {
@@ -49,14 +51,13 @@ mod test {
     use super::*;
 
     fn get_input<'a>() -> &'a str {
-        ""
-    }
-
-    #[test]
-    fn test_parse() {
-        let mut solver = Solution::default();
-        solver.with_input(get_input());
-        println!("{:#?}", solver);
+        "\
+1721
+979
+366
+299
+675
+1456"
     }
 
     #[test]
@@ -64,7 +65,7 @@ mod test {
         let mut solver = Solution::default();
         solver.with_input(get_input());
         let solution = solver.solve_part1();
-        assert_eq!(solution, "");
+        assert_eq!(solution, "514579");
     }
 
     #[test]
@@ -72,7 +73,7 @@ mod test {
         let mut solver = Solution::default();
         solver.with_input(get_input());
         let solution = solver.solve_part2();
-        assert_eq!(solution, "");
+        assert_eq!(solution, "241861950");
     }
 
     #[test]
@@ -80,7 +81,7 @@ mod test {
         let mut solver = Solution::default();
         solver.with_input(INPUT);
         let solution = solver.solve_part1();
-        assert_eq!(solution, "");
+        assert_eq!(solution, "731731");
     }
 
     #[test]
@@ -88,7 +89,7 @@ mod test {
         let mut solver = Solution::default();
         solver.with_input(INPUT);
         let solution = solver.solve_part2();
-        assert_eq!(solution, "");
+        assert_eq!(solution, "116115990");
     }
 }
 

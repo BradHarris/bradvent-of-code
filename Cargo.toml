@@ -7,5 +7,3 @@ edition = "2021"
 lto=true
 panic="abort"
 opt-level=3
-
-[dependencies]

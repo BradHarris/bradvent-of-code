@@ -1,4 +1,4 @@
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 use crate::{year_2020, year_2021, year_2022};
 
@@ -46,26 +46,41 @@ impl Solvers {
             (2022, 16) => Some(Box::new(year_2022::day_16::Solution::default())),
             (2022, 17) => Some(Box::new(year_2022::day_17::Solution::default())),
             (2022, 18) => Some(Box::new(year_2022::day_18::Solution::default())),
-            (2022, 19) => Some(Box::new(year_2022::day_19::Solution::default())),
+            // (2022, 19) => Some(Box::new(year_2022::day_19::Solution::default())),
             (2022, 20) => Some(Box::new(year_2022::day_20::Solution::default())),
             _ => None,
         }
     }
 
     pub fn run_all(&mut self, year: usize, runs: usize) {
-        for day in 1..=25 {
-            self.run(year, day, runs);
-        }
+        let results = (1..=25)
+            .flat_map(|day| {
+                if let Some(d) = self.run(year, day, runs) {
+                    Some((day, d))
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<(usize, (Duration, Duration))>>();
+
+        println!("\n\naveraged over {runs} runs");
+        println!("{: <4} | {: <12} | {: <12}", "day", "part 1", "part 2");
+        results.iter().for_each(|(day, (p1, p2))| {
+            println!(
+                "{day: <4} | {: <12} | {: <12}",
+                format!("{p1:?}"),
+                format!("{p2:?}")
+            )
+        });
     }
 
-    pub fn run(&mut self, year: usize, day: usize, runs: usize) {
+    pub fn run(&mut self, year: usize, day: usize, runs: usize) -> Option<(Duration, Duration)> {
         if self.get_solver(year, day).is_none() {
-            return;
+            return None;
         }
 
         println!("\n--- YEAR {year} - DAY {day:0>2} ---");
 
-        println!("averaged over {runs} runs");
         let part1_start = Instant::now();
         let mut solution1 = "".to_string();
         for _ in 0..runs {
@@ -75,7 +90,7 @@ impl Solvers {
             }
         }
         let part1_dur = part1_start.elapsed() / runs as u32;
-        println!("part 1 ({part1_dur:?}): {solution1}");
+        println!("part 1: {solution1}");
 
         let part2_start = Instant::now();
         let mut solution2 = "".to_string();
@@ -86,6 +101,8 @@ impl Solvers {
             }
         }
         let part2_dur = part2_start.elapsed() / runs as u32;
-        println!("part 2 ({part2_dur:?}): {solution2}");
+        println!("part 2: {solution2}");
+
+        Some((part1_dur, part2_dur))
     }
 }

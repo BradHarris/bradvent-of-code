@@ -78,7 +78,7 @@ impl Solver for Solution {
                         self.rock.insert(Point(x, y1));
                     }
                 } else {
-                    println!("WARN: some lines are not purely vertical or horizontal")
+                    panic!("WARN: some lines are not purely vertical or horizontal")
                 }
             })
         });
@@ -176,14 +176,6 @@ mod test {
     }
 
     #[test]
-    fn test_parse_example() {
-        let mut solver = Solution::default();
-        solver.with_input(get_example_input());
-        // solver.animate(&HashSet::new(), &Point(500, 0));
-        // println!("{:#?}", solver);
-    }
-
-    #[test]
     fn test_solution_example1() {
         let mut solver = Solution::default();
         solver.with_input(get_example_input());
@@ -200,18 +192,11 @@ mod test {
     }
 
     #[test]
-    fn test_parse() {
-        let mut solver = Solution::default();
-        solver.with_input(solver.get_input());
-        // println!("{:#?}", solver);
-    }
-
-    #[test]
     fn test_solution_part1() {
         let mut solver = Solution::default();
         solver.with_input(solver.get_input());
         let solution = solver.solve_part1();
-        assert_eq!(solution, "");
+        assert_eq!(solution, "913");
     }
 
     #[test]
@@ -219,7 +204,7 @@ mod test {
         let mut solver = Solution::default();
         solver.with_input(solver.get_input());
         let solution = solver.solve_part2();
-        assert_eq!(solution, "");
+        assert_eq!(solution, "30762");
     }
 }
 
