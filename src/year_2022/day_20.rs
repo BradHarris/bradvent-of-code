@@ -11,7 +11,7 @@ impl EncryptedFile {
             .content
             .iter()
             .enumerate()
-            .map(|(i, n)| (*n as i64 * decryption_key, i as i64))
+            .map(|(i, n)| (*n * decryption_key, i as i64))
             .collect::<Vec<(i64, i64)>>();
 
         let len = output.len() as i64;
@@ -25,7 +25,7 @@ impl EncryptedFile {
                         continue;
                     } else {
                         let mut new_idx = (idx as i64 + n) % (len - 1);
-                        if new_idx < 0 || new_idx == 0 && n < 0 {
+                        if new_idx <= 0 && n < 0 {
                             new_idx += len - 1;
                         }
 

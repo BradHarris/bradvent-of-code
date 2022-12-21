@@ -68,7 +68,7 @@ impl Rock<'_> {
             .iter()
             .enumerate()
             .any(|(y, p)| {
-                if let Some(r) = rocks.get(y + self.pos.1 as usize - 1) {
+                if let Some(r) = rocks.get(y + self.pos.1 - 1) {
                     r & p != 0
                 } else {
                     false
@@ -87,7 +87,7 @@ impl Rock<'_> {
             .iter()
             .enumerate()
             .any(|(y, p)| {
-                if let Some(r) = rocks.get(y + self.pos.1 as usize) {
+                if let Some(r) = rocks.get(y + self.pos.1) {
                     r & p != 0
                 } else {
                     false
@@ -109,7 +109,7 @@ impl Rock<'_> {
         }
 
         !self.shape.get_pieces(x).iter().enumerate().any(|(y, p)| {
-            if let Some(r) = rocks.get(y + self.pos.1 as usize) {
+            if let Some(r) = rocks.get(y + self.pos.1) {
                 r & p != 0
             } else {
                 false
@@ -181,7 +181,7 @@ impl Solution {
                     break;
                 }
 
-                let y = y + rock.pos.1 as usize;
+                let y = y + rock.pos.1;
                 if y >= rocks.len() {
                     rocks.push(*section);
                 } else {
@@ -308,9 +308,9 @@ fn print_view(rock: &Rock, rocks: &Vec<u8>) {
     let shape = rock.shape.get_pieces(rock.pos.0);
     for y in (min_y..max_y + 10).rev() {
         print!("|");
-        let rocks = rocks.get(y as usize).unwrap_or(&0u8);
+        let rocks = rocks.get(y).unwrap_or(&0u8);
         let rock = if y >= rock.pos.1 && y < rock.pos.1 + shape.len() {
-            shape.get(y as usize - rock.pos.1 as usize).unwrap_or(&0u8)
+            shape.get(y - rock.pos.1).unwrap_or(&0u8)
         } else {
             &0u8
         };

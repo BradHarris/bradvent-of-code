@@ -16,7 +16,7 @@ impl Solvers {
         Self
     }
 
-    #[allow(clippy::no_effect)]
+    #[allow(clippy::box_default)]
     fn get_solver(&self, year: usize, day: usize) -> Option<Box<dyn Solver>> {
         match (year, day) {
             (2020, 1) => Some(Box::new(year_2020::day_01::Solution::default())),

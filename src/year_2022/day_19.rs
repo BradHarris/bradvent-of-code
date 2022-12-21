@@ -62,8 +62,8 @@ impl From<&str> for Blueprint {
         Self {
             idx: idx.parse().unwrap(),
             robots: robots
-                .trim_end_matches(".")
-                .split(".")
+                .trim_end_matches('.')
+                .split('.')
                 .map(|r| r.into())
                 .collect(),
         }
