@@ -180,15 +180,15 @@ impl Solver for Solution {
     fn solve_part2(&self) -> String {
         let mut solutions = HashMap::new();
         self.input.find_optimal_flow(&mut solutions, "AA", 26, 0, 0);
-        let mut total = 0;
+        let mut max_flow = 0;
         for (k1, v1) in solutions.iter() {
             for (k2, v2) in solutions.iter() {
                 if (k1 & k2) == 0 {
-                    total = total.max(v1 + v2);
+                    max_flow = max_flow.max(v1 + v2);
                 }
             }
         }
-        total.to_string()
+        max_flow.to_string()
     }
 }
 

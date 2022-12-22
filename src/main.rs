@@ -36,8 +36,8 @@ fn main() {
     }
 
     if args.day == 0 {
-        solvers.run_all(args.year, args.runs);
+        Solvers::run_all(args.year, args.runs);
     } else {
-        solvers.run(args.year, args.day, args.runs);
+        Solvers::run(args.year, args.day, args.runs);
     };
 }

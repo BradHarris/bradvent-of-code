@@ -5,6 +5,7 @@ pub fn clear_terminal() {
     print!("\x1b[{};{}H", 0, 0);
 }
 
+#[derive(Debug)]
 pub struct DayPerfMetric {
     pub day: usize,
     pub part1: Duration,

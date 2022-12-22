@@ -1,4 +1,8 @@
-use std::time::{Duration, Instant};
+use std::{
+    sync::mpsc,
+    thread::{self, JoinHandle},
+    time::{Duration, Instant},
+};
 
 use crate::{
     utils::{print_time_results, DayPerfMetric},
@@ -20,7 +24,7 @@ impl Solvers {
     }
 
     #[allow(clippy::box_default)]
-    fn get_solver(&self, year: usize, day: usize) -> Option<Box<dyn Solver>> {
+    fn get_solver(year: usize, day: usize) -> Option<Box<dyn Solver>> {
         match (year, day) {
             (2020, 1) => Some(Box::new(year_2020::day_01::Solution::default())),
             (2020, 2) => Some(Box::new(year_2020::day_02::Solution::default())),
@@ -55,52 +59,63 @@ impl Solvers {
         }
     }
 
-    pub fn run_all(&mut self, year: usize, runs: usize) {
-        let results = (1..=25)
-            .flat_map(|day| {
-                if let Some(d) = self.run(year, day, runs) {
-                    Some(DayPerfMetric {
-                        day,
-                        part1: d.0,
-                        part2: d.1,
-                    })
-                } else {
-                    None
-                }
+    pub fn run_all(year: usize, runs: usize) {
+        let (res_tx, res_rx) = mpsc::channel::<DayPerfMetric>();
+
+        let handles: Vec<JoinHandle<_>> = (1..=25)
+            .map(|day| {
+                let res_tx = res_tx.clone();
+                thread::spawn(move || {
+                    if let Some(result) = Solvers::run(year, day, runs) {
+                        res_tx
+                            .send(DayPerfMetric {
+                                day: day,
+                                part1: result.0,
+                                part2: result.1,
+                            })
+                            .unwrap();
+                    }
+                })
             })
-            .collect::<Vec<DayPerfMetric>>();
+            .collect();
+
+        for handle in handles {
+            handle.join().unwrap()
+        }
+        drop(res_tx);
+        println!("finished");
+        let mut results: Vec<DayPerfMetric> = res_rx.iter().collect();
+        results.sort_by_key(|r| r.day);
 
         print_time_results(results, runs);
     }
 
-    pub fn run(&mut self, year: usize, day: usize, runs: usize) -> Option<(Duration, Duration)> {
-        if self.get_solver(year, day).is_none() {
+    pub fn run(year: usize, day: usize, runs: usize) -> Option<(Duration, Duration)> {
+        if Solvers::get_solver(year, day).is_none() {
             return None;
         }
-
-        println!("\n--- YEAR {year} - DAY {day:0>2} ---");
 
         let part1_start = Instant::now();
         let mut solution1 = "".to_string();
         for _ in 0..runs {
-            if let Some(mut solver) = self.get_solver(year, day) {
+            if let Some(mut solver) = Solvers::get_solver(year, day) {
                 solver.with_input(solver.get_input());
                 solution1 = solver.solve_part1();
             }
         }
         let part1_dur = part1_start.elapsed() / runs as u32;
-        println!("part 1: {solution1}");
 
         let part2_start = Instant::now();
         let mut solution2 = "".to_string();
         for _ in 0..runs {
-            if let Some(mut solver) = self.get_solver(year, day) {
+            if let Some(mut solver) = Solvers::get_solver(year, day) {
                 solver.with_input(solver.get_input());
                 solution2 = solver.solve_part2();
             }
         }
         let part2_dur = part2_start.elapsed() / runs as u32;
-        println!("part 2: {solution2}");
+
+        println!("\n--- YEAR {year} - DAY {day:0>2} ---\npart 1: {solution1}\npart 2: {solution2}");
 
         Some((part1_dur, part2_dur))
     }
