@@ -64,18 +64,13 @@ pub struct Solution {
     input: HashMap<String, Monkey>,
 }
 
-fn resolve_monkey(monkeys: &HashMap<String, Monkey>, monkey_id: &str, humn: &Option<i64>) -> i64 {
-    let monkey_op = if humn.is_some() && monkey_id == "humn" {
-        MonkeyOp::Value(humn.unwrap())
-    } else {
-        monkeys.get(monkey_id).unwrap().op.clone()
-    };
-
+fn resolve_monkey(monkeys: &HashMap<String, Monkey>, monkey_id: &str) -> i64 {
+    let monkey_op = monkeys.get(monkey_id).unwrap().op.clone();
     match &monkey_op {
         MonkeyOp::Value(value) => *value,
         MonkeyOp::Operation { left, op, right } => {
-            let left_val = resolve_monkey(monkeys, left, humn);
-            let right_val = resolve_monkey(monkeys, right, humn);
+            let left_val = resolve_monkey(monkeys, left);
+            let right_val = resolve_monkey(monkeys, right);
 
             match op {
                 Operation::Add => left_val.saturating_add(right_val),
@@ -84,6 +79,25 @@ fn resolve_monkey(monkeys: &HashMap<String, Monkey>, monkey_id: &str, humn: &Opt
                 Operation::Div => (left_val as f64).div(right_val as f64).round() as i64,
             }
         }
+    }
+}
+
+fn contains_monkey(monkeys: &HashMap<String, Monkey>, monkey_id: &str, contains_id: &str) -> bool {
+    if let Some(monkey) = monkeys.get(monkey_id) {
+        let op = &monkey.op;
+        match op {
+            MonkeyOp::Operation { left, op: _, right } => {
+                if left == contains_id || right == contains_id {
+                    return true;
+                }
+                let left_val = contains_monkey(monkeys, left, contains_id);
+                let right_val = contains_monkey(monkeys, right, contains_id);
+                left_val || right_val
+            }
+            _ => false,
+        }
+    } else {
+        false
     }
 }
 
@@ -103,44 +117,55 @@ impl Solver for Solution {
     }
 
     fn solve_part1(&self) -> String {
-        resolve_monkey(&self.input, "root", &None).to_string()
+        resolve_monkey(&self.input, "root").to_string()
     }
 
     fn solve_part2(&self) -> String {
         let root = self.input.get("root").unwrap();
-        let mut offset = i64::MAX;
-        let mut humn_val: i64 = i64::MAX;
         if let MonkeyOp::Operation { left, op: _, right } = &root.op {
+            let (mut contains_humn, other_side) = if contains_monkey(&self.input, left, "humn") {
+                (left, right)
+            } else {
+                (right, left)
+            };
+
+            /*
+                pppw
+                cczh
+                lgvd
+                ptdq
+                humn
+
+            */
+            let mut other_val = resolve_monkey(&self.input, &other_side);
             loop {
-                if offset == 0 {
-                    return "offset 0".to_string();
-                }
-
-                println!("humn: {humn_val}, offset: {offset}");
-
-                // let mut buffer = String::new();
-                // let stdin = io::stdin(); // We get `Stdin` here.
-
-                // stdin.read_line(&mut buffer).unwrap();
-                // buffer = buffer.trim().to_string();
-                // humn_val = buffer.parse().unwrap();
-                let humn = Some(humn_val as i64);
-                let left = resolve_monkey(&self.input, &left, &humn);
-                let right = resolve_monkey(&self.input, &right, &humn);
-                println!("{left:?} == {right:?} -> {}", left == right);
-                if left == right {
-                    return humn_val.to_string();
-                } else if left > right {
-                    offset = offset.abs() / 2;
-                } else {
-                    offset = offset.abs() / -2;
-                }
-
-                if let Some(val) = humn_val.checked_add(offset) {
-                    humn_val = val;
-                } else {
-                    offset /= -1;
-                    humn_val += offset;
+                let humn_side = self.input.get(contains_humn).unwrap();
+                match &humn_side.op {
+                    MonkeyOp::Value(_) => {
+                        assert_eq!(humn_side.id, "humn".to_string());
+                        return other_val.to_string();
+                    }
+                    MonkeyOp::Operation { left, op, right } => {
+                        contains_humn = if contains_monkey(&self.input, left, "humn") {
+                            let right_val = resolve_monkey(&self.input, right);
+                            match op {
+                                Operation::Add => other_val -= right_val,
+                                Operation::Sub => other_val += right_val,
+                                Operation::Div => other_val *= right_val,
+                                Operation::Mul => other_val /= right_val,
+                            }
+                            left
+                        } else {
+                            let left_val = resolve_monkey(&self.input, left);
+                            match op {
+                                Operation::Add => other_val -= left_val,
+                                Operation::Sub => other_val = (other_val - left_val) * -1,
+                                Operation::Div => other_val /= left_val,
+                                Operation::Mul => other_val /= left_val,
+                            }
+                            right
+                        };
+                    }
                 }
             }
         } else {
@@ -170,12 +195,6 @@ pppw: cczh / lfqf
 lgvd: ljgn * ptdq
 drzm: hmdt - zczc
 hmdt: 32"
-
-        /*
-            pppw = sjmn
-            cczh / lfqf = sjmn
-
-        */
     }
 
     #[test]
