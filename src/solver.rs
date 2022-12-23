@@ -55,6 +55,7 @@ impl Solvers {
             (2022, 18) => Some(Box::new(year_2022::day_18::Solution::default())),
             // (2022, 19) => Some(Box::new(year_2022::day_19::Solution::default())),
             (2022, 20) => Some(Box::new(year_2022::day_20::Solution::default())),
+            (2022, 21) => Some(Box::new(year_2022::day_21::Solution::default())),
             _ => None,
         }
     }
