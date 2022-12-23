@@ -60,7 +60,7 @@ impl Solvers {
         }
     }
 
-    pub fn run_all(year: usize, runs: usize) {
+    pub fn run_all(year: usize, runs: usize) -> Vec<DayPerfMetric> {
         let (res_tx, res_rx) = mpsc::channel::<DayPerfMetric>();
 
         let handles: Vec<JoinHandle<_>> = (1..=25)
@@ -68,13 +68,7 @@ impl Solvers {
                 let res_tx = res_tx.clone();
                 thread::spawn(move || {
                     if let Some(result) = Solvers::run(year, day, runs) {
-                        res_tx
-                            .send(DayPerfMetric {
-                                day: day,
-                                part1: result.0,
-                                part2: result.1,
-                            })
-                            .unwrap();
+                        res_tx.send(result).unwrap();
                     }
                 })
             })
@@ -88,10 +82,10 @@ impl Solvers {
         let mut results: Vec<DayPerfMetric> = res_rx.iter().collect();
         results.sort_by_key(|r| r.day);
 
-        print_time_results(results, runs);
+        results
     }
 
-    pub fn run(year: usize, day: usize, runs: usize) -> Option<(Duration, Duration)> {
+    pub fn run(year: usize, day: usize, runs: usize) -> Option<DayPerfMetric> {
         if Solvers::get_solver(year, day).is_none() {
             return None;
         }
@@ -118,6 +112,10 @@ impl Solvers {
 
         println!("\n--- YEAR {year} - DAY {day:0>2} ---\npart 1: {solution1}\npart 2: {solution2}");
 
-        Some((part1_dur, part2_dur))
+        Some(DayPerfMetric {
+            day: day,
+            part1: part1_dur,
+            part2: part2_dur,
+        })
     }
 }

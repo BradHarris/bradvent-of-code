@@ -1,8 +1,8 @@
-use std::{collections::HashMap, str::FromStr};
+use std::{collections::HashMap, io, ops::Div, str::FromStr};
 
 use crate::solver::Solver;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 enum Operation {
     Add,
     Sub,
@@ -23,13 +23,13 @@ impl FromStr for Operation {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 enum MonkeyOp {
     Value(i64),
     Operation {
-        first: String,
+        left: String,
         op: Operation,
-        second: String,
+        right: String,
     },
 }
 
@@ -50,17 +50,41 @@ impl FromStr for Monkey {
                 MonkeyOp::Value(rest[0].parse().unwrap())
             } else {
                 MonkeyOp::Operation {
-                    first: rest[0].to_string(),
+                    left: rest[0].to_string(),
                     op: rest[1].parse().unwrap(),
-                    second: rest[2].to_string(),
+                    right: rest[2].to_string(),
                 }
             },
         })
     }
 }
+
 #[derive(Default, Debug)]
 pub struct Solution {
     input: HashMap<String, Monkey>,
+}
+
+fn resolve_monkey(monkeys: &HashMap<String, Monkey>, monkey_id: &str, humn: &Option<i64>) -> i64 {
+    let monkey_op = if humn.is_some() && monkey_id == "humn" {
+        MonkeyOp::Value(humn.unwrap())
+    } else {
+        monkeys.get(monkey_id).unwrap().op.clone()
+    };
+
+    match &monkey_op {
+        MonkeyOp::Value(value) => *value,
+        MonkeyOp::Operation { left, op, right } => {
+            let left_val = resolve_monkey(monkeys, left, humn);
+            let right_val = resolve_monkey(monkeys, right, humn);
+
+            match op {
+                Operation::Add => left_val.saturating_add(right_val),
+                Operation::Sub => left_val.saturating_sub(right_val),
+                Operation::Mul => left_val.saturating_mul(right_val),
+                Operation::Div => (left_val as f64).div(right_val as f64).round() as i64,
+            }
+        }
+    }
 }
 
 impl Solver for Solution {
@@ -76,35 +100,52 @@ impl Solver for Solution {
                 (monkey.id.clone(), monkey)
             })
             .collect();
-        println!("{:#?}", self.input);
     }
 
     fn solve_part1(&self) -> String {
-        let root = self.input.get("root").unwrap();
-        fn resolve_monkey(monkeys: &HashMap<String, Monkey>, cur: &Monkey) -> i64 {
-            match &cur.op {
-                MonkeyOp::Value(value) => *value,
-                MonkeyOp::Operation { first, op, second } => {
-                    let first_monkey = monkeys.get(first).unwrap();
-                    let first_val = resolve_monkey(monkeys, first_monkey);
-                    let second_monkey = monkeys.get(second).unwrap();
-                    let second_val = resolve_monkey(monkeys, second_monkey);
-
-                    match op {
-                        Operation::Add => first_val + second_val,
-                        Operation::Sub => first_val - second_val,
-                        Operation::Mul => first_val * second_val,
-                        Operation::Div => first_val / second_val,
-                    }
-                }
-            }
-        }
-
-        resolve_monkey(&self.input, root).to_string()
+        resolve_monkey(&self.input, "root", &None).to_string()
     }
 
     fn solve_part2(&self) -> String {
-        "".to_string()
+        let root = self.input.get("root").unwrap();
+        let mut offset = i64::MAX;
+        let mut humn_val: i64 = i64::MAX;
+        if let MonkeyOp::Operation { left, op: _, right } = &root.op {
+            loop {
+                if offset == 0 {
+                    return "offset 0".to_string();
+                }
+
+                println!("humn: {humn_val}, offset: {offset}");
+
+                // let mut buffer = String::new();
+                // let stdin = io::stdin(); // We get `Stdin` here.
+
+                // stdin.read_line(&mut buffer).unwrap();
+                // buffer = buffer.trim().to_string();
+                // humn_val = buffer.parse().unwrap();
+                let humn = Some(humn_val as i64);
+                let left = resolve_monkey(&self.input, &left, &humn);
+                let right = resolve_monkey(&self.input, &right, &humn);
+                println!("{left:?} == {right:?} -> {}", left == right);
+                if left == right {
+                    return humn_val.to_string();
+                } else if left > right {
+                    offset = offset.abs() / 2;
+                } else {
+                    offset = offset.abs() / -2;
+                }
+
+                if let Some(val) = humn_val.checked_add(offset) {
+                    humn_val = val;
+                } else {
+                    offset /= -1;
+                    humn_val += offset;
+                }
+            }
+        } else {
+            return "wrong root".to_string();
+        }
     }
 }
 
@@ -129,6 +170,12 @@ pppw: cczh / lfqf
 lgvd: ljgn * ptdq
 drzm: hmdt - zczc
 hmdt: 32"
+
+        /*
+            pppw = sjmn
+            cczh / lfqf = sjmn
+
+        */
     }
 
     #[test]
@@ -144,7 +191,7 @@ hmdt: 32"
         let mut solver = Solution::default();
         solver.with_input(get_example_input());
         let solution = solver.solve_part2();
-        assert_eq!(solution, "");
+        assert_eq!(solution, "301");
     }
 
     #[test]
@@ -160,7 +207,7 @@ hmdt: 32"
         let mut solver = Solution::default();
         solver.with_input(solver.get_input());
         let solution = solver.solve_part2();
-        assert_eq!(solution, "");
+        assert_eq!(solution, "3343167719435");
     }
 }
 

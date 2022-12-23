@@ -1,4 +1,5 @@
 use solver::Solvers;
+use utils::print_time_results;
 
 mod day_template;
 mod solver;
@@ -14,7 +15,6 @@ struct Args {
 }
 
 fn main() {
-    let mut solvers = Solvers::new();
     let mut args = Args {
         day: 0, // 0 implies run all
         year: 2022,
@@ -36,8 +36,12 @@ fn main() {
     }
 
     if args.day == 0 {
-        Solvers::run_all(args.year, args.runs);
+        let results = Solvers::run_all(args.year, args.runs);
+        print_time_results(results, args.runs)
     } else {
-        Solvers::run(args.year, args.day, args.runs);
+        let result = Solvers::run(args.year, args.day, args.runs);
+        if let Some(result) = result {
+            print_time_results(vec![result], args.runs)
+        }
     };
 }
