@@ -83,6 +83,9 @@ fn resolve_monkey(monkeys: &HashMap<String, Monkey>, monkey_id: &str) -> i64 {
 }
 
 fn contains_monkey(monkeys: &HashMap<String, Monkey>, monkey_id: &str, contains_id: &str) -> bool {
+    if monkey_id == contains_id {
+        return true;
+    }
     if let Some(monkey) = monkeys.get(monkey_id) {
         let op = &monkey.op;
         match op {
@@ -129,14 +132,6 @@ impl Solver for Solution {
                 (right, left)
             };
 
-            /*
-                pppw
-                cczh
-                lgvd
-                ptdq
-                humn
-
-            */
             let mut other_val = resolve_monkey(&self.input, &other_side);
             loop {
                 let humn_side = self.input.get(contains_humn).unwrap();
@@ -160,7 +155,7 @@ impl Solver for Solution {
                             match op {
                                 Operation::Add => other_val -= left_val,
                                 Operation::Sub => other_val = (other_val - left_val) * -1,
-                                Operation::Div => other_val /= left_val,
+                                Operation::Div => other_val = left_val / other_val,
                                 Operation::Mul => other_val /= left_val,
                             }
                             right
