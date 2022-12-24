@@ -1,4 +1,3 @@
-use solver::Solvers;
 use utils::print_time_results;
 
 mod day_template;
@@ -36,10 +35,10 @@ fn main() {
     }
 
     if args.day == 0 {
-        let results = Solvers::run_all(args.year, args.runs);
+        let results = solver::run_all(args.year, args.runs);
         print_time_results(results, args.runs)
     } else {
-        let result = Solvers::run(args.year, args.day, args.runs);
+        let result = solver::run(args.year, args.day, args.runs);
         if let Some(result) = result {
             print_time_results(vec![result], args.runs)
         }

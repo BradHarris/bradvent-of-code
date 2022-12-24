@@ -1,16 +1,16 @@
-use std::{collections::HashSet, str::FromStr};
+use std::{collections::HashSet, str::FromStr, sync::mpsc, thread::available_parallelism};
 
-use crate::solver::Solver;
+use crate::{solver::Solver, utils::ThreadPool};
 
-#[derive(Debug, Hash)]
+#[derive(Debug, Hash, Clone)]
 struct Position(i64, i64);
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Beacon {
     pos: Position,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Sensor {
     pos: Position,
     min_x: i64,
@@ -56,38 +56,37 @@ impl FromStr for Sensor {
 pub struct Solution {
     sensors: Vec<Sensor>,
     part1_row: i64,
-    part2_max: i64,
+    part2_max: usize,
 }
 
 impl Solution {
     fn get_ranges(&self, y: i64) -> Vec<(i64, i64)> {
-        self.get_ranges_between(y, i64::MIN, i64::MAX)
+        get_ranges_between(&self.sensors, y, i64::MIN, i64::MAX)
     }
+}
 
-    fn get_ranges_between(&self, y: i64, min_x: i64, max_x: i64) -> Vec<(i64, i64)> {
-        let mut ranges = self
-            .sensors
-            .iter()
-            .filter(|s| (s.min_y..=s.max_y).contains(&y))
-            .map(|s| {
-                let offset = (y - s.pos.1).abs();
-                (min_x.max(s.min_x + offset), max_x.min(s.max_x - offset))
-            })
-            .collect::<Vec<(i64, i64)>>();
+fn get_ranges_between(sensors: &Vec<Sensor>, y: i64, min_x: i64, max_x: i64) -> Vec<(i64, i64)> {
+    let mut ranges = sensors
+        .iter()
+        .filter(|s| (s.min_y..=s.max_y).contains(&y))
+        .map(|s| {
+            let offset = (y - s.pos.1).abs();
+            (min_x.max(s.min_x + offset), max_x.min(s.max_x - offset))
+        })
+        .collect::<Vec<(i64, i64)>>();
 
-        ranges.sort_by_key(|r| r.0);
-        let first = *ranges.first().unwrap();
-        let merged_ranges = ranges.iter().skip(1).fold(vec![first], |mut acc, r| {
-            let last = acc.last_mut().unwrap();
-            if r.0 <= last.1 {
-                last.1 = last.1.max(r.1);
-            } else {
-                acc.push(*r);
-            }
-            acc
-        });
-        merged_ranges
-    }
+    ranges.sort_by_key(|r| r.0);
+    let first = *ranges.first().unwrap();
+    let merged_ranges = ranges.iter().skip(1).fold(vec![first], |mut acc, r| {
+        let last = acc.last_mut().unwrap();
+        if r.0 <= last.1 {
+            last.1 = last.1.max(r.1);
+        } else {
+            acc.push(*r);
+        }
+        acc
+    });
+    merged_ranges
 }
 
 impl Solver for Solution {
@@ -97,7 +96,7 @@ impl Solver for Solution {
 
     fn with_input(&mut self, input: &str) {
         self.part1_row = input.lines().next().unwrap().parse().unwrap();
-        self.part2_max = self.part1_row * 2;
+        self.part2_max = self.part1_row as usize * 2;
         self.sensors = input.lines().skip(1).map(|l| l.parse().unwrap()).collect();
     }
 
@@ -128,14 +127,44 @@ impl Solver for Solution {
     }
 
     fn solve_part2(&self) -> String {
-        for y in 0..self.part2_max {
-            let ranges = self.get_ranges_between(y, 0, self.part2_max);
-            if ranges.len() == 2 {
-                return (((ranges[0].1 + 1) * 4000000) + y).to_string();
-            }
+        let max_workers = available_parallelism().unwrap().get();
+
+        println!("using {max_workers} worker threads");
+
+        let (res_tx, res_rx) = mpsc::channel::<String>();
+
+        let pool = ThreadPool::new(max_workers);
+
+        let res_tx = res_tx.clone();
+
+        let max_range = self.part2_max as i64;
+
+        for i in 0..max_workers {
+            let size = self.part2_max / max_workers;
+            let sensors = self.sensors.clone();
+            let res_tx = res_tx.clone();
+            pool.execute(move || {
+                for y in i * size..(i + 1) * size {
+                    let ranges = get_ranges_between(&sensors, y as i64, 0, max_range);
+                    if ranges.len() == 2 {
+                        res_tx
+                            .send((((ranges[0].1 + 1) * 4000000) + y as i64).to_string())
+                            .unwrap();
+                        drop(res_tx);
+                        break;
+                    }
+                }
+            });
         }
 
-        "failed to find!".to_string()
+        drop(pool);
+        drop(res_tx);
+
+        if let Ok(r) = res_rx.recv() {
+            r
+        } else {
+            "failed to find!".to_string()
+        }
     }
 }
 

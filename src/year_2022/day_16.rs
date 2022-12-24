@@ -143,7 +143,7 @@ impl Solver for Solution {
             network
                 .0
                 .iter()
-                .filter(|(_, v)| v.flow_rate > 0 || v.key == "AA".to_string())
+                .filter(|(_, v)| v.flow_rate > 0 || v.key == *"AA")
                 .enumerate()
                 .map(|(i, (key, v))| {
                     (

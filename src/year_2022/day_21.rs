@@ -1,4 +1,4 @@
-use std::{collections::HashMap, io, ops::Div, str::FromStr};
+use std::{collections::HashMap, ops::Div, str::FromStr};
 
 use crate::solver::Solver;
 
@@ -132,7 +132,7 @@ impl Solver for Solution {
                 (right, left)
             };
 
-            let mut other_val = resolve_monkey(&self.input, &other_side);
+            let mut other_val = resolve_monkey(&self.input, other_side);
             loop {
                 let humn_side = self.input.get(contains_humn).unwrap();
                 match &humn_side.op {
@@ -154,7 +154,7 @@ impl Solver for Solution {
                             let left_val = resolve_monkey(&self.input, left);
                             match op {
                                 Operation::Add => other_val -= left_val,
-                                Operation::Sub => other_val = (other_val - left_val) * -1,
+                                Operation::Sub => other_val = -(other_val - left_val),
                                 Operation::Div => other_val = left_val / other_val,
                                 Operation::Mul => other_val /= left_val,
                             }
@@ -164,7 +164,7 @@ impl Solver for Solution {
                 }
             }
         } else {
-            return "wrong root".to_string();
+            "wrong root".to_string()
         }
     }
 }
