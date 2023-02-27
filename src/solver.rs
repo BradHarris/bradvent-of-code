@@ -1,9 +1,6 @@
-use std::{sync::mpsc, thread::available_parallelism, time::Instant};
+use std::time::Instant;
 
-use crate::{
-    utils::{DayPerfMetric, ThreadPool},
-    year_2020, year_2021, year_2022,
-};
+use crate::{utils::DayPerfMetric, year_2018, year_2020, year_2021, year_2022};
 
 pub trait Solver {
     fn get_input(&self) -> &'static str;
@@ -15,6 +12,8 @@ pub trait Solver {
 #[allow(clippy::box_default)]
 pub fn get_solver(year: usize, day: usize) -> Option<Box<dyn Solver>> {
     match (year, day) {
+        (2018, 5) => Some(Box::new(year_2018::day_05::Solution::default())),
+
         (2020, 1) => Some(Box::new(year_2020::day_01::Solution::default())),
         (2020, 2) => Some(Box::new(year_2020::day_02::Solution::default())),
         (2020, 3) => Some(Box::new(year_2020::day_03::Solution::default())),

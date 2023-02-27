@@ -87,6 +87,7 @@ impl Drop for ThreadPool {
         drop(self.sender.take());
 
         for worker in &mut self.workers {
+            #[cfg(debug_assertions)]
             println!("Shutting down worker {}", worker.id);
 
             if let Some(thread) = worker.thread.take() {
@@ -108,11 +109,13 @@ impl Worker {
 
             match message {
                 Ok(job) => {
+                    #[cfg(debug_assertions)]
                     println!("Worker {id} got a job; executing.");
 
                     job();
                 }
                 Err(_) => {
+                    #[cfg(debug_assertions)]
                     println!("Worker {id} disconnected; shutting down.");
                     break;
                 }
