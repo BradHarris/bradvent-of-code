@@ -178,6 +178,7 @@ mod test {
         let mut solver = Solution::default();
         solver.with_input(get_input());
         let solution = solver.solve_part1();
+        assert_eq!(solution, "21".to_string());
     }
 
     #[test]
@@ -185,6 +186,7 @@ mod test {
         let mut solver = Solution::default();
         solver.with_input(get_input());
         let solution = solver.solve_part2();
+        assert_eq!(solution, "8".to_string());
     }
 }
 
