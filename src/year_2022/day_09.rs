@@ -35,7 +35,7 @@ impl FromStr for Move {
         let (dir, amt) = s.split_once(' ').unwrap();
         Ok(Self {
             dir: dir.parse()?,
-            amt: amt.parse().map_err(|e| format!("{:?}", e))?,
+            amt: amt.parse().map_err(|e| format!("{e:?}"))?,
         })
     }
 }

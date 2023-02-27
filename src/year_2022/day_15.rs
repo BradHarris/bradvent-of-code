@@ -65,7 +65,7 @@ impl Solution {
     }
 }
 
-fn get_ranges_between(sensors: &Vec<Sensor>, y: i64, min_x: i64, max_x: i64) -> Vec<(i64, i64)> {
+fn get_ranges_between(sensors: &[Sensor], y: i64, min_x: i64, max_x: i64) -> Vec<(i64, i64)> {
     let mut ranges = sensors
         .iter()
         .filter(|s| (s.min_y..=s.max_y).contains(&y))
@@ -129,13 +129,12 @@ impl Solver for Solution {
     fn solve_part2(&self) -> String {
         let max_workers = available_parallelism().unwrap().get();
 
+        #[cfg(debug_assertions)]
         println!("using {max_workers} worker threads");
 
         let (res_tx, res_rx) = mpsc::channel::<String>();
 
         let pool = ThreadPool::new(max_workers);
-
-        let res_tx = res_tx.clone();
 
         let max_range = self.part2_max as i64;
 
