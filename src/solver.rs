@@ -21,6 +21,8 @@ pub fn get_solver(year: usize, day: usize) -> Option<Box<dyn Solver>> {
 
         (2021, 1) => Some(Box::new(year_2021::day_01::Solution::default())),
         (2021, 2) => Some(Box::new(year_2021::day_02::Solution::default())),
+        (2021, 3) => Some(Box::new(year_2021::day_03::Solution::default())),
+
         (2021, 25) => Some(Box::new(year_2021::day_25::Solution::default())),
 
         (2022, 1) => Some(Box::new(year_2022::day_01::Solution::default())),
