@@ -1,6 +1,6 @@
 use std::time::Instant;
 
-use crate::{utils::DayPerfMetric, year_2018, year_2020, year_2021, year_2022};
+use crate::{utils::DayPerfMetric, year_2018, year_2020, year_2021, year_2022, year_2023};
 
 pub trait Solver {
     fn get_input(&self) -> &'static str;
@@ -46,6 +46,8 @@ pub fn get_solver(year: usize, day: usize) -> Option<Box<dyn Solver>> {
         // (2022, 19) => Some(Box::new(year_2022::day_19::Solution::default())),
         (2022, 20) => Some(Box::new(year_2022::day_20::Solution::default())),
         (2022, 21) => Some(Box::new(year_2022::day_21::Solution::default())),
+
+        (2023, 1) => Some(Box::new(year_2023::day_01::Solution::default())),
         _ => None,
     }
 }

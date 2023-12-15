@@ -7,6 +7,7 @@ mod year_2018;
 mod year_2020;
 mod year_2021;
 mod year_2022;
+mod year_2023;
 
 #[derive(Debug)]
 struct Args {
