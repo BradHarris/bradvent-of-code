@@ -1,61 +1,61 @@
-import { assertEquals } from "@std/assert/equals";
+import { assertEquals } from "jsr:@std/assert/equals";
 
 export function parseInput(input: string) {
-    return input.split("\n").map((line) => line.split("   ")).reduce(
-        (acc, [l, r]) => {
-            acc[0].push(parseInt(l));
-            acc[1].push(parseInt(r));
-            return acc;
-        },
-        [[], []] as [number[], number[]],
-    );
+  return input.split("\n").map((line) => line.split("   ")).reduce(
+    (acc, [l, r]) => {
+      acc[0].push(parseInt(l));
+      acc[1].push(parseInt(r));
+      return acc;
+    },
+    [[], []] as [number[], number[]],
+  );
 }
 
 export function part1(input: string) {
-    const parsed = parseInput(input);
-    parsed[0].sort();
-    parsed[1].sort();
+  const parsed = parseInput(input);
+  parsed[0].sort();
+  parsed[1].sort();
 
-    let sum = 0;
-    for (let i = 0; i < parsed[0].length; i++) {
-        sum += Math.abs(parsed[0][i] - parsed[1][i]);
-    }
-    return sum.toString();
+  let sum = 0;
+  for (let i = 0; i < parsed[0].length; i++) {
+    sum += Math.abs(parsed[0][i] - parsed[1][i]);
+  }
+  return sum.toString();
 }
 
 Deno.test("part 01 example", () => {
-    assertEquals(part1(EXAMPLE_INPUT), "11");
+  assertEquals(part1(EXAMPLE_INPUT), "11");
 });
 
 Deno.test("part 01 input", () => {
-    assertEquals(part1(INPUT), "2375403");
+  assertEquals(part1(INPUT), "2375403");
 });
 
 export function part2(input: string) {
-    const [left, right] = parseInput(input);
+  const [left, right] = parseInput(input);
 
-    const rightCounts = right.reduce((acc, num) => {
-        acc[num] = (acc[num] ?? 0) + 1;
-        return acc;
-    }, {} as Record<number, number | undefined>);
+  const rightCounts = right.reduce((acc, num) => {
+    acc[num] = (acc[num] ?? 0) + 1;
+    return acc;
+  }, {} as Record<number, number | undefined>);
 
-    let sum = 0;
-    for (const num of left) {
-        sum += num * (rightCounts[num] ?? 0);
-    }
+  let sum = 0;
+  for (const num of left) {
+    sum += num * (rightCounts[num] ?? 0);
+  }
 
-    return sum.toString();
+  return sum.toString();
 }
 
 Deno.test("part 02 example", () => {
-    assertEquals(part2(EXAMPLE_INPUT), "31");
+  assertEquals(part2(EXAMPLE_INPUT), "31");
 });
 
 Deno.test("part 02 input", () => {
-    assertEquals(part2(INPUT), "23082277");
+  assertEquals(part2(INPUT), "23082277");
 });
 
-export const EXAMPLE_INPUT = `3   4
+const EXAMPLE_INPUT = `3   4
 4   3
 2   5
 1   3

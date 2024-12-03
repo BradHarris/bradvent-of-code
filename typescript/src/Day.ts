@@ -1,7 +1,6 @@
 export interface Day {
-    parseInput: (input: string) => any;
-    part1: (input: string) => string;
-    part2: (input: string) => string;
-    EXAMPLE_INPUT: string;
-    INPUT: string;
+  parseInput: (input: string) => any;
+  part1: (input: string) => string;
+  part2: (input: string) => string;
+  INPUT: string;
 }

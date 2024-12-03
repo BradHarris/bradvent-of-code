@@ -1,71 +1,71 @@
-import { assertEquals } from "@std/assert/equals";
+import { assertEquals } from "jsr:@std/assert/equals";
 
 export function parseInput(input: string) {
-    return input.split("\n").map((line) => line.split(" ").map(Number));
+  return input.split("\n").map((line) => line.split(" ").map(Number));
 }
 
 function isSafe(report: number[]) {
-    let dir = 0;
-    for (let i = 0; i <= report.length; i++) {
-        const cur = report[i];
-        const next = report[i + 1];
-        if (next == null) break;
+  let dir = 0;
+  for (let i = 0; i <= report.length; i++) {
+    const cur = report[i];
+    const next = report[i + 1];
+    if (next == null) break;
 
-        const diff = cur - next;
-        const absDiff = Math.abs(diff);
-        const _dir = diff / absDiff;
-        if (dir === 0) {
-            dir = _dir;
-        }
-
-        if (absDiff === 0 || dir !== _dir || absDiff > 3) {
-            return false;
-        }
+    const diff = cur - next;
+    const absDiff = Math.abs(diff);
+    const _dir = diff / absDiff;
+    if (dir === 0) {
+      dir = _dir;
     }
-    return true;
+
+    if (absDiff === 0 || dir !== _dir || absDiff > 3) {
+      return false;
+    }
+  }
+  return true;
 }
 
 export function part1(input: string) {
-    const parsed = parseInput(input);
-    const safeCount = parsed.filter((report) => isSafe(report)).length;
+  const parsed = parseInput(input);
+  const safeCount = parsed.filter((report) => isSafe(report)).length;
 
-    return safeCount.toString();
+  return safeCount.toString();
 }
 
 Deno.test("part 01 example", () => {
-    assertEquals(part1(EXAMPLE_INPUT), "2");
+  assertEquals(part1(EXAMPLE_INPUT), "2");
 });
 
 Deno.test("part 01 input", () => {
-    assertEquals(part1(INPUT), "390");
+  assertEquals(part1(INPUT), "390");
 });
 
 export function part2(input: string) {
-    const parsed = parseInput(input);
-    let safeCount = 0;
-    for (const report of parsed) {
-        for (let i = 0; i <= report.length; i++) {
-            const copy = report.slice();
-            copy.splice(i, 1);
-            if (isSafe(copy)) {
-                safeCount++;
-                break;
-            }
-        }
+  const parsed = parseInput(input);
+  let safeCount = 0;
+  for (const report of parsed) {
+    for (let i = 0; i <= report.length; i++) {
+      const copy = report.slice();
+      copy.splice(i, 1);
+      if (isSafe(copy)) {
+        safeCount++;
+        break;
+      }
     }
+  }
 
-    return safeCount.toString();
+  return safeCount.toString();
 }
 
 Deno.test("part 02 example", () => {
-    assertEquals(part2(EXAMPLE_INPUT), "4");
+  assertEquals(part2(EXAMPLE_INPUT), "4");
 });
 
 Deno.test("part 02 input", () => {
-    assertEquals(part2(INPUT), "439");
+  assertEquals(part2(INPUT), "439");
 });
 
-export const EXAMPLE_INPUT = `7 6 4 2 1
+const EXAMPLE_INPUT = `7 6 4 2 1
 1 2 7 8 9
 9 7 6 2 1
 1 3 2 4 5
