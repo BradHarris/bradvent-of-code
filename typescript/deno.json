@@ -5,7 +5,7 @@
     },
     "test": {
         "include": [
-            "**/year_2024/day_*.ts"
+            "**/year_*/day_*.ts"
         ]
     },
     "imports": {
