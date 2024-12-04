@@ -6,8 +6,13 @@ if (!year || !day) {
   Deno.exit(1);
 }
 
-const template = await Deno.readFile("./src/day-template.ts");
-await Deno.writeFile(`./src/year_${year}/day_${day}.ts`, template);
+const template = await Deno.readTextFile("./src/day-template.ts");
+const newTemplate = template
+  .replaceAll("{{year}}", year)
+  .replaceAll("{{day}}", day);
+await Deno.writeTextFile(`./src/year_${year}/day_${day}.ts`, newTemplate);
+
+await Deno.writeTextFile(`../inputs/${year}/day_${day}.txt`, "");
 
 const days = [];
 for await (const dirEntry of Deno.readDir(`./src/year_${year}`)) {

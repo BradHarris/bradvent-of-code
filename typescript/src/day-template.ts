@@ -9,7 +9,7 @@ export function part1(input: string) {
 }
 
 Deno.test("part 01 example", () => {
-  assertEquals(part1(""), "");
+  assertEquals(part1(``), "");
 });
 
 Deno.test("part 01 input", () => {
@@ -21,11 +21,13 @@ export function part2(input: string) {
 }
 
 Deno.test("part 02 example", () => {
-  assertEquals(part2(""), "");
+  assertEquals(part2(``), "");
 });
 
 Deno.test("part 02 input", () => {
   assertEquals(part2(INPUT), "");
 });
 
-export const INPUT = ``;
+export const INPUT = Deno.readTextFileSync(
+  `${import.meta.dirname}/../../../inputs/{{year}}/day_{{day}}.txt`,
+);

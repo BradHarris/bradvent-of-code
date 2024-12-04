@@ -4,9 +4,11 @@ import type { Day } from "../Day.ts";
 import * as day_01 from "./day_01.ts";
 import * as day_02 from "./day_02.ts";
 import * as day_03 from "./day_03.ts";
+import * as day_04 from "./day_04.ts";
 
 export const days: Day[] = [
   day_01,
-  day_02,
-  day_03,
+    day_02,
+    day_03,
+    day_04
 ];

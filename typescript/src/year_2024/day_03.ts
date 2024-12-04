@@ -72,5 +72,5 @@ Deno.test("part 02 input", () => {
 });
 
 export const INPUT = Deno.readTextFileSync(
-  `${import.meta.dirname}/day_03.input`,
+  `../inputs/2024/day_03.txt`,
 );

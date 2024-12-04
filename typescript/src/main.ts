@@ -1,11 +1,16 @@
 import { years } from "./years.ts";
+// get year and day from args
+const [targetYear, targetDay] = Deno.args;
 
 // Learn more at https://docs.deno.com/runtime/manual/examples/module_metadata#concepts
 if (import.meta.main) {
   for (const [year, days] of Object.entries(years)) {
+    if (targetYear != null && year !== targetYear) continue;
+
     const report: Record<string, Record<string, string>> = {};
     let totalTime = 0;
     for (let i = 0; i < days.length; i++) {
+      if (targetDay != null && i !== Number(targetDay) - 1) continue;
       const day = days[i];
       const now1 = performance.now();
       const part1 = await day.part1(day.INPUT);
