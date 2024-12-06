@@ -57,7 +57,11 @@ Deno.test("part 01 input", () => {
   assertEquals(part1(INPUT), "5067");
 });
 
-function runGrid(grid: string[][], guardPos: [number, number]) {
+function runGrid(
+  grid: string[][],
+  guardPos: [number, number],
+  checkSteps = true,
+) {
   let guardDir = 0;
   const steps = new Set<string>();
   const turns = new Set<string>();
@@ -86,7 +90,9 @@ function runGrid(grid: string[][], guardPos: [number, number]) {
       continue;
     }
     guardPos = np;
-    steps.add(np.join(","));
+    if (checkSteps) {
+      steps.add(np.join(","));
+    }
   }
   return { steps, turns };
 }
@@ -101,7 +107,7 @@ export function part2(input: string) {
     const [y, x] = step.split(",").map(Number);
     grid[y][x] = "#";
     try {
-      runGrid(grid, guardPos);
+      runGrid(grid, guardPos, false);
     } catch (e) {
       if (e instanceof Error && e.message.includes("Loop detected")) {
         loops.push(e.message.split(": ")[1]);
