@@ -7,6 +7,7 @@ import * as day_03 from "./day_03.ts";
 import * as day_04 from "./day_04.ts";
 import * as day_05 from "./day_05.ts";
 import * as day_06 from "./day_06.ts";
+import * as day_07 from "./day_07.ts";
 
 export const days: Day[] = [
   day_01,
@@ -14,5 +15,6 @@ export const days: Day[] = [
     day_03,
     day_04,
     day_05,
-    day_06
+    day_06,
+    day_07
 ];
