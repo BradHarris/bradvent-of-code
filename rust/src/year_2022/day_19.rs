@@ -85,6 +85,7 @@ impl Solver for Solution {
     }
 
     fn solve_part1(&self) -> String {
+        println!("{:#?}", self.input);
         "".to_string()
     }
 
