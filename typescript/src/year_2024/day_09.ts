@@ -68,27 +68,38 @@ export function part2(input: string) {
     groups.push([number, i % 2 === 0 ? i / 2 : null]);
   }
 
-  for (let i = 0; i < groups.length; i++) {
+  for (let i = groups.length - 1; i >= 0; i--) {
     const [count, num] = groups[i];
-    if (num === null) {
-      let last = groups.length - 1;
-      const [lastCount, lastNum] = groups[last];
-      while (lastNum === null && lastCount > count && last > i) {
-        last--;
+    if (num !== null) {
+      for (let j = 0; j < i; j++) {
+        const [gapCount, gapNum] = groups[j];
+        if (gapNum === null && gapCount >= count) {
+          groups[j] = [count, num];
+          groups[i][1] = null;
+          const countDiff = gapCount - count;
+          if (countDiff > 0) {
+            groups.splice(j + 1, 0, [countDiff, null]);
+            i++;
+          }
+          break;
+        }
       }
-      const countDiff = lastCount - count;
-      groups[i] = groups[last];
-      if (countDiff > 0) {
-        groups.splice(i + 1, 0, [countDiff, null]);
-      }
-      groups[last][1] = null;
-      last--;
     }
   }
 
-  console.log(groups);
+  const expanded = groups.flatMap(([count, num]) =>
+    count > 0 ? Array(count).fill(num) : []
+  );
 
-  return "N/A".toString();
+  let checksum = 0;
+  for (let i = 0; i < expanded.length; i++) {
+    const value = expanded[i];
+    if (value !== null) {
+      checksum += value * i;
+    }
+  }
+
+  return checksum.toString();
 }
 
 Deno.test("part 02 example1", () => {
